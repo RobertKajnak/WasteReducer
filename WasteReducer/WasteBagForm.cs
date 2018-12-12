@@ -70,8 +70,8 @@ namespace WasteReducer
                     Label zwblabel = new Label();
                     zwblabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
                     zwblabel.Font = new Font("Calibri", 32);
-                    zwblabel.Size = new Size(210,48);
-                    zwblabel.Text = "ZWB " + wasteBags.IndexOf(bag);
+                    zwblabel.Size = new Size(210,96);
+                    zwblabel.Text = "ZWB " + wasteBags.IndexOf(bag) + '\n' + bag.Sum(p=>p.Price) + '€';
                     wasteBagLane.Controls.Add(zwblabel);
                     foreach (Product prod in bag)
                     {
