@@ -20,6 +20,7 @@ namespace WasteReducer
         private DatabaseHandler db = null;
         private const string PATH = "res/img/";
         private Dictionary<PictureBox, Product> addedProducts;
+        private Font overlayFont;
 
         public CategrizerForm()
         {
@@ -27,6 +28,7 @@ namespace WasteReducer
 
             pictureBoxes = this.flowLayoutPanelMain.Controls;
             addedProducts = new Dictionary<PictureBox, Product>();
+            labelHelp.Size = new Size(this.ClientSize.Width - 30, this.ClientSize.Height - this.menuStrip1.Height - 30);
 
             try
             {
@@ -39,6 +41,9 @@ namespace WasteReducer
                 this.Close();
                 Application.Exit();
             }
+
+            overlayFont = new Font("calibri",12F);
+
         }
 
         private void Categorizer_Load(object sender, EventArgs e)
@@ -94,6 +99,8 @@ namespace WasteReducer
             {
                 string filename = prod.ImageName;
                 Image im = LoadImage(filename);
+                string overlayText = prod.Category + '\n' + prod.Price + '€';
+                im = addTextToPicture(new Bitmap(im), overlayText, overlayFont);
                 PictureBox pic = AddPictureBox(im);
                 addedProducts.Add(pic, prod);
             }
@@ -142,9 +149,9 @@ namespace WasteReducer
             pictureBox.Name = "pictureBox" + pictureBoxes.Count;
             ///Eliminates the possibility of not having a selection zone around the image
             if (image.Size.Height / image.Size.Width == 5 / 4)
-                pictureBox.Size = new System.Drawing.Size(210, 160);
+                pictureBox.Size = new System.Drawing.Size(250, 200);
             else
-                pictureBox.Size = new System.Drawing.Size(200, 160);
+                pictureBox.Size = new System.Drawing.Size(240, 200);
 
             pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             pictureBox.TabIndex = 0;
@@ -159,6 +166,47 @@ namespace WasteReducer
             this.flowLayoutPanelMain.ResumeLayout(false);
 
             return pictureBox;
+        }
+
+        private Bitmap addTextToPicture(Bitmap original,string text, Font font)
+        {
+            Font resizedFont = new Font(overlayFont.FontFamily, (float)(overlayFont.Size * (float)original.Height / 100.0));
+            Font resizedFontShadow = new Font(overlayFont.FontFamily, (float)(overlayFont.Size * (float)original.Height / 98.0),FontStyle.Bold);
+            int R =0,G=0,B=0,S=0;
+            for (int i = original.Height/5; i < original.Height*4/5; i += 10)
+                for (int j= original.Width/5; j<original.Width*4/5; j += 10)
+                {
+                    Color c = original.GetPixel(i, j);
+                    R += c.R;
+                    G += c.G;
+                    B += c.B;
+                    S++;
+                }
+            R /= S;G /= S;B /= S;
+            Color col = Color.FromArgb(255- R,255 - G,255 - B);
+            Color colShadow = Color.FromArgb(R, G, B);
+            
+
+            StringFormat format = new StringFormat();
+            format.Alignment = StringAlignment.Center;
+            format.LineAlignment = StringAlignment.Center;
+            format.Trimming = StringTrimming.EllipsisCharacter;
+            //Bitmap img = new Bitmap(width, height);
+            Graphics Graph = Graphics.FromImage(original);
+
+            //G.Clear(background);
+            var rect = new Rectangle(0, 0, original.Width, original.Height);
+
+            SolidBrush brush_shadow = new SolidBrush(colShadow);
+            Graph.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+            Graph.DrawString(text, resizedFontShadow, brush_shadow, rect, format);
+            brush_shadow.Dispose();
+
+            SolidBrush brush_text = new SolidBrush(col);
+            Graph.DrawString(text, resizedFont, brush_text, rect, format);
+            brush_text.Dispose();
+
+            return original;
         }
 
         private void SelectPictureBox(PictureBox pb)
@@ -382,6 +430,7 @@ namespace WasteReducer
         private void Categorizer_Resize(object sender, EventArgs e)
         {
             flowLayoutPanelMain.Size = new System.Drawing.Size(this.ClientSize.Width, this.ClientSize.Height - this.menuStrip1.Height);
+            labelHelp.Size = new Size(this.ClientSize.Width-30, this.ClientSize.Height - this.menuStrip1.Height-30);
         }
         #endregion
     }

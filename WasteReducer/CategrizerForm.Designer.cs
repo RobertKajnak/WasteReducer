@@ -39,6 +39,7 @@
             this.flowLayoutPanelMain = new System.Windows.Forms.FlowLayoutPanel();
             this.labelHelp = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
+            this.flowLayoutPanelMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -50,7 +51,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(684, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1134, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -95,38 +96,36 @@
             // 
             this.flowLayoutPanelMain.AllowDrop = true;
             this.flowLayoutPanelMain.AutoScroll = true;
+            this.flowLayoutPanelMain.Controls.Add(this.labelHelp);
             this.flowLayoutPanelMain.Location = new System.Drawing.Point(0, 27);
             this.flowLayoutPanelMain.Name = "flowLayoutPanelMain";
-            this.flowLayoutPanelMain.Size = new System.Drawing.Size(684, 414);
+            this.flowLayoutPanelMain.Size = new System.Drawing.Size(1134, 584);
             this.flowLayoutPanelMain.TabIndex = 1;
             this.flowLayoutPanelMain.DoubleClick += new System.EventHandler(this.FlowLayoutPanelMain_DoubleClick);
             // 
             // labelHelp
             // 
-            this.labelHelp.AutoSize = true;
             this.labelHelp.Enabled = false;
             this.labelHelp.Font = new System.Drawing.Font("Calibri", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelHelp.Location = new System.Drawing.Point(85, 86);
+            this.labelHelp.Location = new System.Drawing.Point(3, 0);
             this.labelHelp.Name = "labelHelp";
-            this.labelHelp.Size = new System.Drawing.Size(522, 273);
+            this.labelHelp.Size = new System.Drawing.Size(1110, 563);
             this.labelHelp.TabIndex = 1;
             this.labelHelp.Text = "Scan an item or double click \r\nin the empty region to add an item\r\n\r\nPress Backsp" +
     "ace or delete to remove it\r\n\r\nPress Enter or click \r\n\'Generate\' to sort the item" +
     "s\"";
             this.labelHelp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // Categrizer
+            // CategrizerForm
             // 
-            this.AllowDrop = false;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.ClientSize = new System.Drawing.Size(684, 441);
-            this.Controls.Add(this.labelHelp);
+            this.ClientSize = new System.Drawing.Size(1134, 611);
             this.Controls.Add(this.flowLayoutPanelMain);
             this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Categrizer";
-            this.Text = "Product Category Suggester";
             this.Icon = global::WasteReducer.Properties.Resources.icon;
+            this.MainMenuStrip = this.menuStrip1;
+            this.Name = "CategrizerForm";
+            this.Text = "Product Category Suggester";
             this.Load += new System.EventHandler(this.Categorizer_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Categorizer_KeyDown);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Categorizer_KeyPress);
@@ -134,6 +133,7 @@
             this.Resize += new System.EventHandler(this.Categorizer_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.flowLayoutPanelMain.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
