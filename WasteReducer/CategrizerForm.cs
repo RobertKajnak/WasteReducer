@@ -330,6 +330,14 @@ namespace WasteReducer
             return img;
         }
 
+        private void AddDemoItems()
+        {
+            foreach (int i in new[]{6395,6395,6395,7614,7614,14757,24436,
+                25351,25351,25351,25351,31289,1040,1040,1040, 21585, 21585, 21585,
+                21578,21583, 12756,12756,12756,1624,7205,7205,7205,7205,32457,32457,
+                498,498})
+                AddItem(i);
+        }
         #endregion
 
         #region ToolStrip Events
@@ -417,11 +425,15 @@ namespace WasteReducer
             switch (e.KeyCode)
             {
                 case (Keys.B):
-                    ///DeBUG
+                    ///deBug
                     foreach (Product p in db.Database)
                     {
                         AddItem(p.Id);
                     }
+                    break;
+                case (Keys.U):
+                    ///debUg
+                    AddDemoItems();
                     break;
                 case (Keys.D):
                     ClearWorkspace();

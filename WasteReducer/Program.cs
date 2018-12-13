@@ -16,14 +16,14 @@ namespace WasteReducer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            /*try
-            {*/
-                Application.Run(new CategrizerForm());
-            /*}
-            catch (Exception)
+            try
             {
-
-            }*/
+                Application.Run(new CategrizerForm());
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "An Error has occured");
+            }
             
         }
     }

@@ -14,6 +14,7 @@ namespace WasteReducer
         private readonly List<Product> expired;
         private readonly List<Product> discounted;
         private readonly List<Product> ZWB_candidates;
+        private readonly List<List<Product>> ZWB_final;
 
         /// <summary>
         /// Generates the items that should be discounted and those that should be left on
@@ -30,29 +31,33 @@ namespace WasteReducer
             discounted = new List<Product>();
             ZWB_candidates = new List<Product>();
 
-        ///Not only shorthand, but if the date changes during run, the results will be consistent
-        DateTime today = DateTime.Today;
-            foreach (Product product in products)
-            {
-                if (product.ExpiryDate <= today)
+            ///Not only shorthand, but if the date changes during run, the results will be consistent
+            DateTime today = DateTime.Today;
+                foreach (Product product in products)
                 {
-                    expired.Add(product);
-                }
-                else if (product.ExpiryDate <= today.AddDays(1))
-                {
-                    discounted.Add(product);
+                    if (product.ExpiryDate <= today)
+                    {
+                        expired.Add(product);
+                    }
+                    else if (product.ExpiryDate <= today.AddDays(1) || product.Facing>4)
+                    {
+                        discounted.Add(product);
                     
-                }
-                else if (product.ExpiryDate <= today.AddDays(3))
-                {
-                    ZWB_candidates.Add(product);
-                }
-                else
-                {
-                    shelf.Add(product);
-                }
+                    }
+                    else if (product.ExpiryDate <= today.AddDays(3))
+                    {
+                        ZWB_candidates.Add(product);
+                    }
+                    else
+                    {
+                        shelf.Add(product);
+                    }
 
-            }
+                }
+            ZWB_final = generateWasteBags();
+            foreach (var p in ZWB_candidates)
+                discounted.Add(p);
+            ZWB_candidates.Clear();
         }
 
         /// <summary>
@@ -63,6 +68,7 @@ namespace WasteReducer
         private void AddToBags(List<List<Product>> ZWB, List<Predicate<Product>> criteria)
         {
             int n = this.config.NrOfBags;
+            ///Initialized the empty bags, if they have not been yet
             if (ZWB.Count == 0)
             {
                 for (int i = 0; i < n; i++) ZWB.Add(new List<Product>());
@@ -70,22 +76,29 @@ namespace WasteReducer
 
             foreach (var p in criteria)
             {
-                var prods = ZWB_candidates.FindAll(p);
+                ///Filters the candidates by the criteria, in order
+                ///Then sorts them by price
+                var prods = ZWB_candidates.FindAll(p).OrderBy(x=>-x.Price).ToList();
                 if (prods.Count == 0)
                     continue;
                 int ip = 0;
 
                 bool nothingAdded = false;
-                while (!nothingAdded)
+                while (ip<prods.Count)
                 {
+                    if (nothingAdded)
+                        ip++;
                     nothingAdded = true;
                     for (int i = 0; i < n && ip<prods.Count; i++)
                     {
+                        ///checks for items within the category of the to-be-added item and ensures it doesn't go over limit
                         if ((ZWB[i].FindAll(x=>x.Category.Equals(prods[ip].Category)).Count<prods[ip].Limit) &&
-                            (ZWB[i].Sum(x => x.Price)+prods[ip].Price<config.PriceLimitUpper))
+                            ///Checks to be within price, but try to be close to the lower price
+                            (ZWB[i].Sum(x => x.Price)+prods[ip].Price<config.PriceLimitUpper) &&
+                            (ZWB[i].Sum(x => x.Price) < config.PriceLimitLower))
                         {
-                            ZWB[i].Add(prods[ip++]);
-                            ZWB_candidates.Remove(prods[i]);
+                            ZWB[i].Add(prods[ip]);
+                            ZWB_candidates.Remove(prods[ip++]);
                             nothingAdded = false;
                         }
                     }
@@ -102,58 +115,15 @@ namespace WasteReducer
                 int n = this.config.NrOfBags;
                 var ZWB = new List<List<Product>>();
                 var criteria = new List<Predicate<Product>>();
-                criteria.Add(p => p.Category.Equals("Salad"));
+                criteria.Add(p => p.Category.Equals("salad"));
                 criteria.Add(p => p.IsDiary == true);
                 criteria.Add(p => p.Category.Equals("big meal"));
+                //criteria.Add(p => p.Category.Equals("snack"));
 
                 //Shorthand for the rest:
                 criteria.Add(p => p.Price > 0);
                 AddToBags(ZWB,criteria);
 
-                /*List<Product> leftovers = new List<Product>();
-
-                ZWB_candidates.FindAll()
-                ///Add all salads. 
-                var salads = ZWB_candidates.FindAll(x => x.Category.Equals("Salad"));
-                for (int i = 0; i < Math.Min(n,salads.Count); i++)
-                {
-                    for (j=0;j<salads[i].Limit;j++)
-                    ZWB[i].Add(salads[i]);
-                    ZWB_candidates.Remove(salads[i]);
-                }
-                ///Max 1 salad per bag
-                foreach (var salad in salads)
-                {
-                    ZWB_candidates.Remove(salad);
-                }
-
-                ///Add a maximum of one diary per bag
-                var diaries = ZWB_candidates.FindAll(x => x.IsDiary == true);
-                for (var diary in diaries)
-                {
-
-                }*/
-
-                /*bool[] used = new bool[ZWB_candidates.Count];
-                for (int i = 0; i < config.NrOfBags;i++)
-                {
-                    List<Product> zwb = new List<Product>();
-                    for (int j=0;j<ZWB_candidates.Count;j++)
-                    {
-                        double sum = zwb.Sum(x => x.Price);
-                        if (sum <= config.PriceLimitUpper && !used[j])
-                        {
-                            zwb.Add(ZWB_candidates[j]);
-                            used[j] = true;
-                        }
-                        if (sum >= config.PriceLimitLower)
-                        {
-                            break;
-                        }
-                    }
-
-                    ZWB.Add(zwb);
-                }*/
                 return ZWB;
             }
             
@@ -161,7 +131,7 @@ namespace WasteReducer
         public List<Product> GetShelfItems() => shelf;
         public List<Product> GetExpiredItems() => expired;
         public List<Product> GetDiscountedProducts() => discounted;
-        public List<List<Product>> GetWasteBags() => generateWasteBags();
+        public List<List<Product>> GetWasteBags() => ZWB_final ;
 
     }
 }

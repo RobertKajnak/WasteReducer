@@ -37,7 +37,7 @@ namespace WasteReducer
             {
                 foreach (string line in lines)
                 {
-                    if (line[0].Equals('#'))
+                    if (line.Length<4 || line[0].Equals('#'))
                         continue;
 
                     string[] attributes = line.Split(';');

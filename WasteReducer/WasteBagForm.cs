@@ -71,12 +71,14 @@ namespace WasteReducer
                     zwblabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
                     zwblabel.Font = new Font("Calibri", 32);
                     zwblabel.Size = new Size(210,96);
-                    zwblabel.Text = "ZWB " + wasteBags.IndexOf(bag) + '\n' + bag.Sum(p=>p.Price) + '€';
+                    zwblabel.Text = "ZWB " + (wasteBags.IndexOf(bag)+1) + '\n' + bag.Sum(p=>p.Price) + '€';
                     wasteBagLane.Controls.Add(zwblabel);
+                    wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + zwblabel.Height);
                     foreach (Product prod in bag)
                     {
-                        wasteBagLane.Controls.Add(CreatePictureBox(inverse[prod]));
-                        wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + 160);
+                        var pb = CreatePictureBox(inverse[prod]);
+                        wasteBagLane.Controls.Add(pb);
+                        wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + pb.Height+1);
                     }
                 }
             }

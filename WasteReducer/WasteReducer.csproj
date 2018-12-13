@@ -57,6 +57,7 @@
     <Compile Include="CategrizerForm.Designer.cs">
       <DependentUpon>CategrizerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GraphicTools.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
