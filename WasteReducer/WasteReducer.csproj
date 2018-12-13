@@ -48,6 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddItemForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddItemForm.Designer.cs">
+      <DependentUpon>AddItemForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="CategorizerLogic.cs" />
     <Compile Include="DatabaseException.cs" />
     <Compile Include="DatabaseHandler.cs" />
@@ -71,6 +77,9 @@
     <Compile Include="WasteBagForm.Designer.cs">
       <DependentUpon>WasteBagForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AddItemForm.resx">
+      <DependentUpon>AddItemForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CategrizerForm.resx">
       <DependentUpon>CategrizerForm.cs</DependentUpon>
     </EmbeddedResource>

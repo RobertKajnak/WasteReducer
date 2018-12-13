@@ -41,10 +41,9 @@ namespace WasteReducer
                         continue;
 
                     string[] attributes = line.Split(';');
-                    DateTime expiryDate = DateTime.Today.AddDays(int.Parse(attributes[7]));
                     this.database.Add(
                         new Product(long.Parse(attributes[0]), PATH + attributes[0] + ".jpg", attributes[1],attributes[2],
-                        int.Parse(attributes[3])==1,int.Parse(attributes[4]), double.Parse(attributes[5]),int.Parse(attributes[6]), expiryDate)
+                        int.Parse(attributes[3])==1,int.Parse(attributes[4]), double.Parse(attributes[5]),int.Parse(attributes[6]), 0)
                         );
                 }
             }
@@ -55,7 +54,16 @@ namespace WasteReducer
 
         }
 
-        public Product GetProduct(long id) => database.Find(p=>p.Id==id);
+        public Product GetProduct(long id)
+        {
+            var target = database.Find(p => p.Id == id);
+            if (target == null)
+                return null;
+            else
+            {
+                return new Product(target);
+            }
+        }
 
         /// <summary>
         /// Initializes connection to database. If connection failes an exception is thrown and null is returned

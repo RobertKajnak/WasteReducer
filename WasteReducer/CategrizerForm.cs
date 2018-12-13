@@ -88,9 +88,10 @@ namespace WasteReducer
         }
 
         ///TODO(optional): analyse if handling only the ID instead of the Product object is better
-        private void AddItem(long id)
+        private void AddItem(long id, DateTime date)
         {
             Product prod = db.GetProduct(id);
+            prod.SetExpiry(date);
             if (prod == null)
             {
                 MessageBox.Show("The specified product does not exist");
@@ -99,7 +100,7 @@ namespace WasteReducer
             {
                 string filename = prod.ImageName;
                 Image im = LoadImage(filename);
-                string overlayText = prod.Category + '\n' + prod.Price + '€';
+                string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n'+prod.Id;
                 im = AddTextToPicture(new Bitmap(im), overlayText, overlayFont);
                 PictureBox pic = AddPictureBox(im);
                 addedProducts.Add(pic, prod);
@@ -108,24 +109,24 @@ namespace WasteReducer
 
         private void PromptAddItem()
         {
-            string result = Prompt.ShowDialog("Type in the bar code", "Add code manually");
-            if (result!=null)
+            var prompt = new AddItemForm();
+            if (prompt.ShowDialog() == DialogResult.OK)
             {
-                long barcode = -1;
-                long.TryParse(result, out barcode);
+                long barcode = prompt.barcode;
+
                 if (barcode == -1)
                 {
                     MessageBox.Show("Invalid Barcode");
                 }
                 else
                 {
-                    AddItem(barcode);
+                    AddItem(barcode,prompt.date);
                 }
             }
 
         }
 
-        private void PasteItem()
+        /*private void PasteItem()
         {
             long barcode=-1;
             long.TryParse(Clipboard.GetText(TextDataFormat.Text),out barcode);
@@ -133,7 +134,7 @@ namespace WasteReducer
             {
                 AddItem(barcode);
             }
-        }
+        }*/
 
 
         ///TODO(optional): Reduce picture size after loading to reduce memory usage. Also: don't load the same image twice
@@ -343,7 +344,7 @@ namespace WasteReducer
                 25351,25351,25351,25351,31289,1040,1040,1040, 21585, 21585, 21585,
                 21578,21583, 12756,12756,12756,1624,7205,7205,7205,7205,32457,32457,
                 498,498})
-                AddItem(i);
+                AddItem(i,DateTime.Today.AddDays(2));
         }
         #endregion
 
@@ -433,9 +434,10 @@ namespace WasteReducer
             {
                 case (Keys.B):
                     ///deBug
+                    Random rand = new Random();
                     foreach (Product p in db.Database)
                     {
-                        AddItem(p.Id);
+                        AddItem(p.Id,DateTime.Today.AddDays(rand.Next(0,5)));
                     }
                     break;
                 case (Keys.U):
@@ -451,7 +453,7 @@ namespace WasteReducer
                 case (Keys.V):
                     if (isControlPressed)
                     {
-                        PasteItem();
+                        //PasteItem();
                     }
                     break;
                 case (Keys.Enter):
