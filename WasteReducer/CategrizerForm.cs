@@ -100,7 +100,7 @@ namespace WasteReducer
                 string filename = prod.ImageName;
                 Image im = LoadImage(filename);
                 string overlayText = prod.Category + '\n' + prod.Price + '€';
-                im = addTextToPicture(new Bitmap(im), overlayText, overlayFont);
+                im = AddTextToPicture(new Bitmap(im), overlayText, overlayFont);
                 PictureBox pic = AddPictureBox(im);
                 addedProducts.Add(pic, prod);
             }
@@ -168,24 +168,55 @@ namespace WasteReducer
             return pictureBox;
         }
 
-        private Bitmap addTextToPicture(Bitmap original,string text, Font font)
+        /// <summary>
+        /// Calculate the dominant color of the image
+        /// </summary>
+        /// <param name="image">Image to parse</param>
+        /// <param name="useDominant">True: uses most dominant R/G/B; False: uses average</param>
+        /// <returns></returns>
+        private Color GetDominantColor(Bitmap image, bool useDominant=true)
         {
-            Font resizedFont = new Font(overlayFont.FontFamily, (float)(overlayFont.Size * (float)original.Height / 100.0));
-            Font resizedFontShadow = new Font(overlayFont.FontFamily, (float)(overlayFont.Size * (float)original.Height / 98.0),FontStyle.Bold);
-            int R =0,G=0,B=0,S=0;
-            for (int i = original.Height/5; i < original.Height*4/5; i += 10)
-                for (int j= original.Width/5; j<original.Width*4/5; j += 10)
+            int R = 0, G = 0, B = 0, S = 0;
+            for (int i = image.Height / 4; i < image.Height * 3 / 4; i += 10)
+                for (int j = image.Width / 4; j < image.Width * 3 / 4; j += 10)
                 {
-                    Color c = original.GetPixel(i, j);
-                    R += c.R;
-                    G += c.G;
-                    B += c.B;
-                    S++;
+                    Color c = image.GetPixel(i, j);
+                    if (useDominant)
+                    {
+                        R += (c.R >= c.G && c.R >= c.B) ? 1 : 0;
+                        G += (c.G >= c.R && c.G >= c.B) ? 1 : 0;
+                        B += (c.B >= c.G && c.B >= c.R) ? 1 : 0;
+                    }
+                    else
+                    {
+                        R += c.R;
+                        G += c.G;
+                        B += c.B;
+                        S++;
+                    }
                 }
-            R /= S;G /= S;B /= S;
-            Color col = Color.FromArgb(255- R,255 - G,255 - B);
-            Color colShadow = Color.FromArgb(R, G, B);
-            
+            if (useDominant)
+            {
+                int Rn = (R >= G && R >= B) ? 255 : 0;
+                int Gn = (G >= R && R >= B) ? 255 : 0;
+                int Bn = (B >= G && B >= R) ? 255 : 0;
+                R = Rn; B = Bn; G = Gn;
+            }
+            else
+            {
+                R /= S; G /= S; B /= S;
+            }
+
+            return Color.FromArgb(R, G, B);
+        }
+
+        private Bitmap AddTextToPicture(Bitmap original,string text, Font font)
+        {
+            float scalingFactor = (float)((float)original.Height / 100.0);
+            Font resizedFont = new Font(overlayFont.FontFamily, overlayFont.Size * scalingFactor);
+
+            Color colShadow = GetDominantColor(original, true);
+            Color col = Color.FromArgb(255- colShadow.R, 255 - colShadow.G, 255 - colShadow.B);
 
             StringFormat format = new StringFormat();
             format.Alignment = StringAlignment.Center;
@@ -195,13 +226,15 @@ namespace WasteReducer
             Graphics Graph = Graphics.FromImage(original);
 
             //G.Clear(background);
-            var rect = new Rectangle(0, 0, original.Width, original.Height);
+            int offset = (int)Math.Ceiling(scalingFactor * 1.5);
+            var rect_shadow = new Rectangle(offset, offset, original.Width- offset, original.Height- offset);
 
             SolidBrush brush_shadow = new SolidBrush(colShadow);
             Graph.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
-            Graph.DrawString(text, resizedFontShadow, brush_shadow, rect, format);
+            Graph.DrawString(text, resizedFont, brush_shadow, rect_shadow, format);
             brush_shadow.Dispose();
 
+            var rect = new Rectangle(0, 0, original.Width, original.Height);
             SolidBrush brush_text = new SolidBrush(col);
             Graph.DrawString(text, resizedFont, brush_text, rect, format);
             brush_text.Dispose();
