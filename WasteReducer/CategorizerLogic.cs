@@ -39,7 +39,7 @@ namespace WasteReducer
                     {
                         expired.Add(product);
                     }
-                    else if (product.ExpiryDate <= today.AddDays(1) || product.Facing>4)
+                    else if (product.ExpiryDate <= today.AddDays(1))
                     {
                         discounted.Add(product);
                     
@@ -65,7 +65,7 @@ namespace WasteReducer
         /// </summary>
         /// <param name="ZWB"></param>
         /// <param name="criteria"></param>
-        private void AddToBags(List<List<Product>> ZWB, List<Predicate<Product>> criteria)
+        private void AddToBags(List<List<Product>> ZWB, List<Predicate<Product>> criteriaImportance, List<Predicate<Product>> criteriaFilter)
         {
             int n = this.config.NrOfBags;
             ///Initialized the empty bags, if they have not been yet
@@ -74,11 +74,20 @@ namespace WasteReducer
                 for (int i = 0; i < n; i++) ZWB.Add(new List<Product>());
             }
 
-            foreach (var p in criteria)
+            var ZWB_passed = new List<Product>();
+            foreach (var crit in criteriaFilter)
+            {
+                var tempBag = ZWB_candidates.FindAll(crit);
+                ZWB_passed.AddRange(tempBag);
+                tempBag.ForEach(x=>ZWB_candidates.Remove(x));
+            }
+
+            criteriaImportance.Add(x=>true);
+            foreach (var p in criteriaImportance)
             {
                 ///Filters the candidates by the criteria, in order
                 ///Then sorts them by price
-                var prods = ZWB_candidates.FindAll(p).OrderBy(x=>-x.Price).ToList();
+                var prods = ZWB_passed.FindAll(p).OrderBy(x=>-x.Price).ToList();
                 if (prods.Count == 0)
                     continue;
                 int ip = 0;
@@ -98,12 +107,14 @@ namespace WasteReducer
                             (ZWB[i].Sum(x => x.Price) < config.PriceLimitLower))
                         {
                             ZWB[i].Add(prods[ip]);
-                            ZWB_candidates.Remove(prods[ip++]);
+                            ZWB_passed.Remove(prods[ip++]);
                             nothingAdded = false;
                         }
                     }
                 }
             }
+            criteriaImportance.RemoveAt(criteriaImportance.Count-1);
+            ZWB_passed.ForEach(x=>ZWB_candidates.Add(x));
         }
 
         private List<List<Product>> generateWasteBags()
@@ -114,15 +125,16 @@ namespace WasteReducer
             {
                 int n = this.config.NrOfBags;
                 var ZWB = new List<List<Product>>();
-                var criteria = new List<Predicate<Product>>();
-                criteria.Add(p => p.Category.Equals("salad"));
-                criteria.Add(p => p.IsDiary == true);
-                criteria.Add(p => p.Category.Equals("big meal"));
-                //criteria.Add(p => p.Category.Equals("snack"));
+                ///The preferences by which order the products will be added in order
+                var pref = new List<Predicate<Product>>();
+                pref.Add(p => p.Category.Equals("salad"));
+                pref.Add(p => p.IsDiary == true);
+                pref.Add(p => p.Category.Equals("big meal"));
 
-                //Shorthand for the rest:
-                criteria.Add(p => p.Price > 0);
-                AddToBags(ZWB,criteria);
+                //Items that should be not considered 
+                var filt = new List<Predicate<Product>>();
+                filt.Add(x => x.Facing <= 4);
+                AddToBags(ZWB, pref, filt);
 
                 return ZWB;
             }
