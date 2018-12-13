@@ -210,6 +210,13 @@ namespace WasteReducer
             return Color.FromArgb(R, G, B);
         }
 
+        /// <summary>
+        /// Overlays text onto the original. The original file is modified. The same is returned
+        /// </summary>
+        /// <param name="original">the original image. WIll be modified</param>
+        /// <param name="text">The text ot be overlayed</param>
+        /// <param name="font">the font familiy and sizeis the only relevant attribute</param>
+        /// <returns> pointer to original</returns>
         private Bitmap AddTextToPicture(Bitmap original,string text, Font font)
         {
             float scalingFactor = (float)((float)original.Height / 100.0);

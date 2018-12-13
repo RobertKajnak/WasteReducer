@@ -96,7 +96,6 @@
             // 
             this.flowLayoutPanelMain.AllowDrop = true;
             this.flowLayoutPanelMain.AutoScroll = true;
-            this.flowLayoutPanelMain.Controls.Add(this.labelHelp);
             this.flowLayoutPanelMain.Location = new System.Drawing.Point(0, 27);
             this.flowLayoutPanelMain.Name = "flowLayoutPanelMain";
             this.flowLayoutPanelMain.Size = new System.Drawing.Size(1134, 584);
@@ -120,6 +119,7 @@
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(1134, 611);
+            this.Controls.Add(this.labelHelp);
             this.Controls.Add(this.flowLayoutPanelMain);
             this.Controls.Add(this.menuStrip1);
             this.Icon = global::WasteReducer.Properties.Resources.icon;
