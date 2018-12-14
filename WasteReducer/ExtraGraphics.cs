@@ -12,8 +12,8 @@ namespace WasteReducer
 {
     public static class ExtraGraphics
     {
-        public static readonly int BOXWIDTH = 250;
-        public static readonly int BOXHEIGHT = 200;
+        public static int BOXWIDTH = 250;
+        public static int BOXHEIGHT = 200;
 
         /// <summary>
         /// Calculate the dominant color of the image

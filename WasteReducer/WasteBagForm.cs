@@ -23,10 +23,17 @@ namespace WasteReducer
         List<Product> trash;
         FlowLayoutPanel trashLane;
         WasteBagConfiguration WBConfig = null;
+        Dictionary<Product, Bitmap> productIcons;
 
         public WasteBagForm(List<Product> productList, Dictionary<Product,Bitmap> productIcons)
         {
             InitializeComponent();
+
+            var screen = Screen.FromControl(this);
+            this.Width = screen.WorkingArea.Width * 7 / 10;
+            this.Height = screen.WorkingArea.Height * 9 / 10;
+
+            this.productIcons = productIcons;
 
             var products = new List<Product>();
             foreach (var prod in productList)
@@ -39,35 +46,16 @@ namespace WasteReducer
 
             WBConfig = new WasteBagConfiguration();
             logic = new CategorizerLogic(products, WBConfig);
-            
 
-            shelf = logic.GetShelfItems();
             shelfLane = AddLane(Lanetype.SHELF);
-            if (shelf.Count > 0) 
-                shelfLane.Controls.Add(new RotatedLabel("Shelf"));
-            foreach (Product prod in shelf)
-            {
-                shelfLane.Controls.Add(ExtraGraphics.GeneratePictureBox(productIcons[prod]));
-            }
-
-            discounted = logic.GetDiscountedProducts();
-            discountedLane = AddLane(Lanetype.DISCOUNT);
-            if (discounted.Count>0)
-                discountedLane.Controls.Add(new RotatedLabel("Discount"));
-            foreach (Product prod in discounted)
-            {
-                discountedLane.Controls.Add(ExtraGraphics.GeneratePictureBox(productIcons[prod]));
-            }
-
-            trash = logic.GetExpiredItems();
-            trashLane = AddLane(Lanetype.TRASH);
-            if (trash.Count > 0)
-                trashLane.Controls.Add(new RotatedLabel("Trash"));
-            foreach (Product prod in trash)
-            {
-                trashLane.Controls.Add(ExtraGraphics.GeneratePictureBox(productIcons[prod]));
-            }
+            AddProductsToLane("Shelf", shelfLane, logic.GetShelfItems());
             
+            discountedLane = AddLane(Lanetype.DISCOUNT);
+            AddProductsToLane("Discount", discountedLane, logic.GetDiscountedProducts());
+            
+            trashLane = AddLane(Lanetype.TRASH);
+            AddProductsToLane("Trash", trashLane, logic.GetExpiredItems());
+
             wasteBags = logic.GetWasteBags();
             if (wasteBags.Count > 0)
             {
@@ -152,6 +140,16 @@ namespace WasteReducer
             flowLayoutPanel.TabIndex = 0;
 
             return flowLayoutPanel;
+        }
+
+        private void AddProductsToLane(string label, FlowLayoutPanel lane, List<Product> products)
+        {
+            if (products.Count > 0)
+                lane.Controls.Add(new RotatedLabel(label));
+            foreach (Product prod in products)
+            {
+                lane.Controls.Add(ExtraGraphics.GeneratePictureBox(productIcons[prod]));
+            }
         }
 
         private FlowLayoutPanel addWasteBagLane()

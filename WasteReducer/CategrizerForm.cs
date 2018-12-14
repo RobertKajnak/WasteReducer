@@ -29,6 +29,12 @@ namespace WasteReducer
         public CategrizerForm()
         {
             InitializeComponent();
+            var screen = Screen.FromControl(this);
+            this.Width = screen.WorkingArea.Width*7/10;
+            this.Height = screen.WorkingArea.Height * 7 / 10;
+            ExtraGraphics.BOXHEIGHT = screen.WorkingArea.Height *10/53;
+            ExtraGraphics.BOXWIDTH = ExtraGraphics.BOXHEIGHT * 5 / 4;
+
 
             pictureBoxes = this.flowLayoutPanelMain.Controls;
             addedProducts = new Dictionary<PictureBox, Product>();
@@ -260,6 +266,20 @@ namespace WasteReducer
                 498,498})
                 AddItem(i,DateTime.Today.AddDays(2));
         }
+
+        private void ZoomIn()
+        {
+            ExtraGraphics.BOXHEIGHT = (int)(ExtraGraphics.BOXHEIGHT * 1.2);
+            ExtraGraphics.BOXWIDTH = (int)(ExtraGraphics.BOXWIDTH * 1.2);
+            OrganizeDuplicates();
+        }
+        private void ZoomOut()
+        {
+            ExtraGraphics.BOXHEIGHT = (int)(ExtraGraphics.BOXHEIGHT / 1.2);
+            ExtraGraphics.BOXWIDTH = (int)(ExtraGraphics.BOXWIDTH / 1.2);
+            OrganizeDuplicates();
+        }
+
         #endregion
 
         #region ToolStrip Events
@@ -369,6 +389,12 @@ namespace WasteReducer
                         AddItem(p.Id,DateTime.Today.AddDays(rand.Next(0,5)));
                     }
                     break;
+                case (Keys.Add):
+                    ZoomIn();
+                    break;
+                case (Keys.Subtract):
+                    ZoomOut();
+                    break;
                 case (Keys.U):
                     ///debUg
                     AddDemoItems();
@@ -420,8 +446,17 @@ namespace WasteReducer
             flowLayoutPanelMain.Size = new System.Drawing.Size(this.ClientSize.Width, this.ClientSize.Height - this.menuStrip1.Height);
             labelHelp.Size = new Size(this.ClientSize.Width-30, this.ClientSize.Height - this.menuStrip1.Height-30);
         }
+
         #endregion
 
+        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ZoomIn();
+        }
 
+        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ZoomOut();
+        }
     }
 }
