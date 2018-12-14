@@ -22,9 +22,16 @@ namespace WasteReducer
         FlowLayoutPanel trashLane;
         WasteBagConfiguration WBConfig = null;
         Dictionary<Product, Bitmap> productIcons;
+        int laneTitleSize;
         bool isGroupingEnabled;
 
-        public WasteBagForm(List<Product> productList, Dictionary<Product,Bitmap> productIcons)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="productList"></param>
+        /// <param name="productIcons"></param>
+        /// <param name="isGroupingEnabled">If the list is grouped this CAN still be set to either</param>
+        public WasteBagForm(List<Product> productList, Dictionary<Product,Bitmap> productIcons,bool isGroupingEnabled)
         {
             InitializeComponent();
 
@@ -33,29 +40,39 @@ namespace WasteReducer
             this.Height = screen.WorkingArea.Height * 9 / 10;
 
             this.productIcons = productIcons;
+            this.isGroupingEnabled = isGroupingEnabled;
 
             var products = new List<Product>();
             foreach (var prod in productList)
             {
                 for (int i = 0; i < prod.Count; i++)
                 {
-                    products.Add(prod);
+                    products.Add(new Product(prod));
                 }
             }
 
             WBConfig = new WasteBagConfiguration();
             logic = new CategorizerLogic(products, WBConfig);
 
+            InitializeLanes();
+        }
+
+        private void InitializeLanes()
+        {
+            laneTitleSize = ExtraGraphics.BOXHEIGHT / 7;
+            wasteBagLanePanel = null;
+            flowLayoutPanelMain.Controls.Clear();
+
             productLanes = new List<List<Product>>();
 
             productLanes.Add(logic.GetShelfItems());
             shelfLane = AddLane(Lanetype.SHELF);
             AddProductsToLane("Shelf", shelfLane, logic.GetShelfItems());
-            
+
             discountedLane = AddLane(Lanetype.DISCOUNT);
             productLanes.Add(logic.GetDiscountedProducts());
             AddProductsToLane("Discount", discountedLane, logic.GetDiscountedProducts());
-            
+
             trashLane = AddLane(Lanetype.TRASH);
             productLanes.Add(logic.GetExpiredItems());
             AddProductsToLane("Trash", trashLane, logic.GetExpiredItems());
@@ -70,9 +87,9 @@ namespace WasteReducer
                     FlowLayoutPanel wasteBagLane = AddLane(Lanetype.ZWB);
                     Label zwblabel = new Label();
                     zwblabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-                    zwblabel.Font = new Font("Calibri", 32);
-                    zwblabel.Size = new Size(ExtraGraphics.BOXWIDTH+10,96);
-                    zwblabel.Text = "ZWB " + (wasteBags.IndexOf(bag)+1) + '\n' + bag.Sum(p=>p.Price) + '€';
+                    zwblabel.Font = new Font("Calibri", laneTitleSize);
+                    zwblabel.Size = new Size(ExtraGraphics.BOXWIDTH + 10, laneTitleSize * 4);
+                    zwblabel.Text = "ZWB " + (wasteBags.IndexOf(bag) + 1) + '\n' + bag.Sum(p => p.Price) + '€';
                     wasteBagLane.Controls.Add(zwblabel);
                     //wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + zwblabel.Height);
                     foreach (Product prod in bag)
@@ -80,12 +97,11 @@ namespace WasteReducer
                         var pb = AddToLane(prod, wasteBagLane);
                         //wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + pb.Height+1);
                     }
-                    wasteBagLanePanel.Size = new Size(wasteBagLanePanel.Width, wasteBageLanes.Max(x => x.Height)+10);
+                    wasteBagLanePanel.Size = new Size(wasteBagLanePanel.Width, wasteBageLanes.Max(x => x.Height) + 10);
                 }
             }
-
+            OrganizeLanes();
         }
-
         #region Helper Classes And Functions
 
         enum Lanetype { SHELF, DISCOUNT, ZWB, TRASH}
@@ -134,7 +150,7 @@ namespace WasteReducer
         private void AddProductsToLane(string label, FlowLayoutPanel lane, List<Product> products)
         {
             if (products.Count > 0)
-                lane.Controls.Add(new RotatedLabel(label));
+                lane.Controls.Add(new RotatedLabel(label,laneTitleSize,ExtraGraphics.BOXHEIGHT));
             foreach (Product prod in products)
             {
                 AddToLane(prod, lane);
@@ -241,7 +257,7 @@ namespace WasteReducer
                     OrganizeLane(lanes[i], productLanes[i]);
                 }
             }
-            for (int i=0;i<wasteBags.Count;i++)
+            for (int i=0;i< wasteBageLanes.Count;i++)
             {
                 OrganizeLane(wasteBageLanes[i], wasteBags[i]);
             }
@@ -249,6 +265,19 @@ namespace WasteReducer
 
         }
 
+        private void ZoomIn()
+        {
+            ExtraGraphics.BOXHEIGHT = (int)(ExtraGraphics.BOXHEIGHT * 1.2);
+            ExtraGraphics.BOXWIDTH = (int)(ExtraGraphics.BOXWIDTH * 1.2);
+            InitializeLanes();
+        }
+
+        private void ZoomOut()
+        {
+            ExtraGraphics.BOXHEIGHT = (int)(ExtraGraphics.BOXHEIGHT / 1.2);
+            ExtraGraphics.BOXWIDTH = (int)(ExtraGraphics.BOXWIDTH / 1.2);
+            InitializeLanes();
+        }
         #endregion
 
         #region Buttons
@@ -258,6 +287,16 @@ namespace WasteReducer
         {
             isGroupingEnabled = groupToolStripMenuItem.Checked;
             OrganizeLanes();
+        }
+
+        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ZoomIn();
+        }
+
+        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ZoomOut();
         }
         #endregion
 
@@ -299,6 +338,12 @@ namespace WasteReducer
                     isGroupingEnabled = !isGroupingEnabled;
                     groupToolStripMenuItem.Checked = isGroupingEnabled;
                     OrganizeLanes();
+                    break;
+                case (Keys.Add):
+                    ZoomIn();
+                    break;
+                case (Keys.Subtract):
+                    ZoomOut();
                     break;
                 case (Keys.ControlKey):
                     //isControlPressed = true;

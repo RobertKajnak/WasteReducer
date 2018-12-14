@@ -17,14 +17,14 @@ namespace WasteReducer
         private double rotationAngle;
         private string text;
 
-        public RotatedLabel(string text)
+        public RotatedLabel(string text, int fontHeight,int width)
         {
             //Setting the initial condition.
             rotationAngle = 270d;
-            this.Size = new Size(32, 160);
+            this.Size = new Size(fontHeight, width);
             this.text = text;
             this.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.Font = new Font("Calibri", 32);
+            this.Font = new Font("Calibri", fontHeight);
         }
 
 
