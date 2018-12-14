@@ -21,14 +21,20 @@ namespace WasteReducer
         /// <param name="image">Image to parse</param>
         /// <param name="useDominant">True: uses most dominant R/G/B; False: uses average</param>
         /// <returns></returns>
-        public static Color GetDominantColor(Bitmap image, bool useDominant = true)
+        public enum SearchPattern
+        {
+            Dominant,
+            Average,
+            BlackAndWhite
+        }
+        public static Color GetDominantColor(Bitmap image, SearchPattern mode)
         {
             int R = 0, G = 0, B = 0, S = 0;
             for (int i = image.Height / 4; i < image.Height * 3 / 4; i += 10)
                 for (int j = image.Width / 4; j < image.Width * 3 / 4; j += 10)
                 {
                     Color c = image.GetPixel(j, i);
-                    if (useDominant)
+                    if (mode == SearchPattern.Dominant)
                     {
                         R += (c.R >= c.G && c.R >= c.B) ? 1 : 0;
                         G += (c.G >= c.R && c.G >= c.B) ? 1 : 0;
@@ -42,7 +48,7 @@ namespace WasteReducer
                         S++;
                     }
                 }
-            if (useDominant)
+            if (mode==SearchPattern.Dominant)
             {
                 int Rn = (R >= G && R >= B) ? 255 : 0;
                 int Gn = (G >= R && R >= B) ? 255 : 0;
@@ -52,6 +58,17 @@ namespace WasteReducer
             else
             {
                 R /= S; G /= S; B /= S;
+                if (mode == SearchPattern.BlackAndWhite)
+                {
+                    if (R + G + B > 128*3)
+                    {
+                        R = 255;G = 255;B = 255;
+                    }
+                    else
+                    {
+                        R = 0;G = 0;B = 0;
+                    }
+                }
             }
 
             return Color.FromArgb(R, G, B);
@@ -72,7 +89,7 @@ namespace WasteReducer
             float scalingFactor = (float)((float)newIm.Height / 100.0);
             Font resizedFont = new Font(font.FontFamily, font.Size * scalingFactor);
 
-            Color colShadow = GetDominantColor(newIm, true);
+            Color colShadow = GetDominantColor(newIm, SearchPattern.BlackAndWhite);
             Color col = Color.FromArgb(255 - colShadow.R, 255 - colShadow.G, 255 - colShadow.B);
 
             StringFormat format = new StringFormat();
@@ -83,8 +100,8 @@ namespace WasteReducer
             Graphics Graph = Graphics.FromImage(newIm);
 
             //G.Clear(background);
-            int offset = (int)Math.Ceiling(scalingFactor * 1.5);
-            var rect_shadow = new Rectangle(offset, offset, newIm.Width - offset, newIm.Height - offset);
+            int offset = (int)Math.Ceiling(scalingFactor * 1);
+            var rect_shadow = new Rectangle(offset, offset, newIm.Width, newIm.Height);
 
             SolidBrush brush_shadow = new SolidBrush(colShadow);
             Graph.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
