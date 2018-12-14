@@ -233,7 +233,7 @@ namespace WasteReducer
             }
             else
             {
-                new WasteBagForm(addedProducts).Show();
+                new WasteBagForm(addedProducts.Values.ToList(),productIcons).Show();
             }
         }
 

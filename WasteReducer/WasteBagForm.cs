@@ -23,14 +23,22 @@ namespace WasteReducer
         FlowLayoutPanel trashLane;
         WasteBagConfiguration WBConfig = null;
 
-        public WasteBagForm(Dictionary<PictureBox,Product> products)
+        public WasteBagForm(List<Product> productList, Dictionary<Product,Bitmap> productIcons)
         {
             InitializeComponent();
 
-            WBConfig = new WasteBagConfiguration();
-            logic = new CategorizerLogic(GenerateProductList(products), WBConfig);
+            var products = new List<Product>();
+            foreach (var prod in productList)
+            {
+                for (int i = 0; i < prod.Count; i++)
+                {
+                    products.Add(prod);
+                }
+            }
 
-            var inverse = GenerateReverseMap(products);
+            WBConfig = new WasteBagConfiguration();
+            logic = new CategorizerLogic(products, WBConfig);
+            
 
             shelf = logic.GetShelfItems();
             shelfLane = AddLane(Lanetype.SHELF);
@@ -38,7 +46,7 @@ namespace WasteReducer
                 shelfLane.Controls.Add(new RotatedLabel("Shelf"));
             foreach (Product prod in shelf)
             {
-                shelfLane.Controls.Add(CreatePictureBox(inverse[prod]));
+                shelfLane.Controls.Add(CreatePictureBox(productIcons[prod]));
             }
 
             discounted = logic.GetDiscountedProducts();
@@ -47,7 +55,7 @@ namespace WasteReducer
                 discountedLane.Controls.Add(new RotatedLabel("Discount"));
             foreach (Product prod in discounted)
             {
-                discountedLane.Controls.Add(CreatePictureBox(inverse[prod]));
+                discountedLane.Controls.Add(CreatePictureBox(productIcons[prod]));
             }
 
             trash = logic.GetExpiredItems();
@@ -56,7 +64,7 @@ namespace WasteReducer
                 trashLane.Controls.Add(new RotatedLabel("Trash"));
             foreach (Product prod in trash)
             {
-                trashLane.Controls.Add(CreatePictureBox(inverse[prod]));
+                trashLane.Controls.Add(CreatePictureBox(productIcons[prod]));
             }
             
             wasteBags = logic.GetWasteBags();
@@ -76,7 +84,7 @@ namespace WasteReducer
                     wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + zwblabel.Height);
                     foreach (Product prod in bag)
                     {
-                        var pb = CreatePictureBox(inverse[prod]);
+                        var pb = CreatePictureBox(productIcons[prod]);
                         wasteBagLane.Controls.Add(pb);
                         wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + pb.Height+1);
                     }
@@ -87,15 +95,6 @@ namespace WasteReducer
 
         #region Helper Classes And Functions
 
-        private List<Product> GenerateProductList(Dictionary<PictureBox,Product> products)
-        {
-            List<Product> addedOnes = new List<Product>();
-            foreach (Product item in products.Values)
-            {
-                addedOnes.Add(item);
-            }
-            return addedOnes;
-        }
 
         private Dictionary<Product,Image> GenerateReverseMap(Dictionary<PictureBox, Product> original)
         {
