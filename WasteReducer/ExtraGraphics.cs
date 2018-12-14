@@ -14,6 +14,7 @@ namespace WasteReducer
     {
         public static int BOXWIDTH = 250;
         public static int BOXHEIGHT = 200;
+        public static Font overlayFont = new Font("calibri", 12F);
 
         /// <summary>
         /// Calculate the dominant color of the image
@@ -214,7 +215,18 @@ namespace WasteReducer
             }
         }
 
+        public static Image AddTextOverlay(Image im, Product prod)
+        {
+            string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n' + prod.Id + "\n To Exp: " + (prod.ExpiryDate - DateTime.Today).TotalDays;
+            im = AddTextToPicture(new Bitmap(im), overlayText, overlayFont);
+            if (prod.Count > 1)
+            {
+                overlayText = 'x' + prod.Count.ToString();
+                im = AddTextToPicture(new Bitmap(im), overlayText, overlayFont, StringAlignment.Far, StringAlignment.Far);
+            }
+            return im;
 
+        }
         public static PictureBox GeneratePictureBox(Image image)
         {
             PictureBox pictureBox = new PictureBox();

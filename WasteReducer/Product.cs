@@ -37,10 +37,9 @@ namespace WasteReducer
 
         public override int GetHashCode()
         {
-            var hashCode = 860764308;
+            var hashCode = 679641088;
             hashCode = hashCode * -1521134295 + base.GetHashCode();
             hashCode = hashCode * -1521134295 + ExpiryDate.GetHashCode();
-            hashCode = hashCode * -1521134295 + Count.GetHashCode();
             return hashCode;
         }
     }

@@ -23,7 +23,6 @@ namespace WasteReducer
         private const string PATH = "res/img/";
         private Dictionary<PictureBox, Product> addedProducts;
         private Dictionary<Product, Bitmap> productIcons;
-        private Font overlayFont;
         private bool isGroupingEnabled;
 
         public CategrizerForm()
@@ -52,8 +51,7 @@ namespace WasteReducer
                 this.Close();
                 Application.Exit();
             }
-
-            overlayFont = new Font("calibri", 12F);
+            
 
             isGroupingEnabled = groupItemsToolStripMenuItem.Checked;
         }
@@ -114,13 +112,7 @@ namespace WasteReducer
             foreach (var prod in products)
             {
                 Image im = GetProductImage(prod);
-                string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n' + prod.Id + "\n To Exp: " + (prod.ExpiryDate - DateTime.Today).TotalDays;
-                im = ExtraGraphics.AddTextToPicture(new Bitmap(im), overlayText, overlayFont);
-                if (prod.Count > 1)
-                {
-                    overlayText = 'x' + prod.Count.ToString();
-                    im = ExtraGraphics.AddTextToPicture(new Bitmap(im), overlayText, overlayFont, StringAlignment.Far, StringAlignment.Far);
-                }
+                im = ExtraGraphics.AddTextOverlay(im, prod);
                 PictureBox pic = AddPictureBox(im);
                 addedProducts.Add(pic, prod);
             }
@@ -332,6 +324,16 @@ namespace WasteReducer
             }
             OrganizeDuplicates();
         }
+
+        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ZoomIn();
+        }
+
+        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ZoomOut();
+        }
         #endregion
 
         #region Help
@@ -449,14 +451,6 @@ namespace WasteReducer
 
         #endregion
 
-        private void zoomInToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ZoomIn();
-        }
 
-        private void zoomOutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ZoomOut();
-        }
     }
 }
