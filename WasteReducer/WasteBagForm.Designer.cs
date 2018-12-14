@@ -41,7 +41,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(684, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1184, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -58,13 +58,13 @@
             this.flowLayoutPanelMain.AutoScroll = true;
             this.flowLayoutPanelMain.Location = new System.Drawing.Point(0, 27);
             this.flowLayoutPanelMain.Name = "flowLayoutPanelMain";
-            this.flowLayoutPanelMain.Size = new System.Drawing.Size(1100, 600);
+            this.flowLayoutPanelMain.Size = new System.Drawing.Size(1184, 614);
             this.flowLayoutPanelMain.TabIndex = 1;
             // 
             // WasteBagForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.ClientSize = new System.Drawing.Size(1100, 600);
+            this.ClientSize = new System.Drawing.Size(1184, 641);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.flowLayoutPanelMain);
             this.Icon = global::WasteReducer.Properties.Resources.icon;

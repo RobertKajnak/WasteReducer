@@ -18,6 +18,7 @@ namespace WasteReducer
         List<Product> discounted;
         FlowLayoutPanel discountedLane;
         List<List<Product>> wasteBags;
+        List<FlowLayoutPanel> wasteBageLanes;
         FlowLayoutPanel wasteBagLanePanel = null;
         List<Product> trash;
         FlowLayoutPanel trashLane;
@@ -46,7 +47,7 @@ namespace WasteReducer
                 shelfLane.Controls.Add(new RotatedLabel("Shelf"));
             foreach (Product prod in shelf)
             {
-                shelfLane.Controls.Add(CreatePictureBox(productIcons[prod]));
+                shelfLane.Controls.Add(ExtraGraphics.GeneratePictureBox(productIcons[prod]));
             }
 
             discounted = logic.GetDiscountedProducts();
@@ -55,7 +56,7 @@ namespace WasteReducer
                 discountedLane.Controls.Add(new RotatedLabel("Discount"));
             foreach (Product prod in discounted)
             {
-                discountedLane.Controls.Add(CreatePictureBox(productIcons[prod]));
+                discountedLane.Controls.Add(ExtraGraphics.GeneratePictureBox(productIcons[prod]));
             }
 
             trash = logic.GetExpiredItems();
@@ -64,7 +65,7 @@ namespace WasteReducer
                 trashLane.Controls.Add(new RotatedLabel("Trash"));
             foreach (Product prod in trash)
             {
-                trashLane.Controls.Add(CreatePictureBox(productIcons[prod]));
+                trashLane.Controls.Add(ExtraGraphics.GeneratePictureBox(productIcons[prod]));
             }
             
             wasteBags = logic.GetWasteBags();
@@ -78,16 +79,17 @@ namespace WasteReducer
                     Label zwblabel = new Label();
                     zwblabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
                     zwblabel.Font = new Font("Calibri", 32);
-                    zwblabel.Size = new Size(210,96);
+                    zwblabel.Size = new Size(ExtraGraphics.BOXWIDTH+10,96);
                     zwblabel.Text = "ZWB " + (wasteBags.IndexOf(bag)+1) + '\n' + bag.Sum(p=>p.Price) + '€';
                     wasteBagLane.Controls.Add(zwblabel);
                     wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + zwblabel.Height);
                     foreach (Product prod in bag)
                     {
-                        var pb = CreatePictureBox(productIcons[prod]);
+                        var pb = ExtraGraphics.GeneratePictureBox(productIcons[prod]);
                         wasteBagLane.Controls.Add(pb);
                         wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + pb.Height+1);
                     }
+                    wasteBagLanePanel.Size = new Size(wasteBagLanePanel.Width, wasteBageLanes.Max(x => x.Height)+10);
                 }
             }
 
@@ -156,21 +158,25 @@ namespace WasteReducer
         {
             if (wasteBagLanePanel == null)
             {
+                wasteBageLanes = new List<FlowLayoutPanel>();
                 wasteBagLanePanel = new FlowLayoutPanel();
 
                 this.flowLayoutPanelMain.Controls.Add(wasteBagLanePanel);
 
                 wasteBagLanePanel.AutoSize = false;
-                wasteBagLanePanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowOnly;
                 wasteBagLanePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
                 wasteBagLanePanel.Location = new System.Drawing.Point(3, 3);
                 wasteBagLanePanel.Name = "flowLayoutPanelZWB";
                 ///TODO: fix the height
-                wasteBagLanePanel.Size = new System.Drawing.Size(this.flowLayoutPanelMain.Size.Width, 2000);
+                wasteBagLanePanel.Size = new System.Drawing.Size(10, 10);
                 wasteBagLanePanel.TabIndex = 0;
             }
 
+            wasteBagLanePanel.Size = new System.Drawing.Size(
+                wasteBagLanePanel.Width + ExtraGraphics.BOXWIDTH+5, wasteBagLanePanel.Height);
+
             FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel();
+            wasteBageLanes.Add(flowLayoutPanel);
 
             this.wasteBagLanePanel.Controls.Add(flowLayoutPanel);
 
@@ -179,31 +185,13 @@ namespace WasteReducer
             flowLayoutPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             flowLayoutPanel.Location = new System.Drawing.Point(3, 3);
             flowLayoutPanel.Name = "flowLayoutPanelZWB";
-            flowLayoutPanel.Size = new System.Drawing.Size(210, 42);
+            flowLayoutPanel.Size = new System.Drawing.Size(ExtraGraphics.BOXWIDTH, 42);
             flowLayoutPanel.TabIndex = 0;
 
             return flowLayoutPanel;
         }
 
-        private PictureBox CreatePictureBox(Image image)
-        {
-            PictureBox pictureBox = new PictureBox();
-            ///Eliminates the possibility of not having a selection zone around the image
-            if (image.Size.Height / image.Size.Width == 5 / 4)
-                pictureBox.Size = new System.Drawing.Size(210, 160);
-            else
-                pictureBox.Size = new System.Drawing.Size(200, 160);
 
-            pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            pictureBox.TabIndex = 0;
-            pictureBox.TabStop = false;
-            pictureBox.Padding = new System.Windows.Forms.Padding(5);
-            //pictureBox.Click += new System.EventHandler(this.PictureBox_Click);
-
-            pictureBox.Image = image;
-
-            return pictureBox;
-        }
 
         #endregion
 
