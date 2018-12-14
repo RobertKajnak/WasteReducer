@@ -22,7 +22,7 @@ namespace WasteReducer
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message, "An Error has occured");
+                MessageBox.Show(e.Message+ "\n\nStacktrace:\n"+e.StackTrace, "An Error has occured");
             }
             
         }

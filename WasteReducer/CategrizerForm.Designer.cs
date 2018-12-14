@@ -39,7 +39,6 @@
             this.flowLayoutPanelMain = new System.Windows.Forms.FlowLayoutPanel();
             this.labelHelp = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
-            this.flowLayoutPanelMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -106,9 +105,9 @@
             // 
             this.labelHelp.Enabled = false;
             this.labelHelp.Font = new System.Drawing.Font("Calibri", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelHelp.Location = new System.Drawing.Point(3, 0);
+            this.labelHelp.Location = new System.Drawing.Point(3, 27);
             this.labelHelp.Name = "labelHelp";
-            this.labelHelp.Size = new System.Drawing.Size(1110, 563);
+            this.labelHelp.Size = new System.Drawing.Size(1110, 536);
             this.labelHelp.TabIndex = 1;
             this.labelHelp.Text = "Scan an item or double click \r\nin the empty region to add an item\r\n\r\nPress Backsp" +
     "ace or delete to remove it\r\n\r\nPress Enter or click \r\n\'Generate\' to sort the item" +
@@ -133,7 +132,6 @@
             this.Resize += new System.EventHandler(this.Categorizer_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.flowLayoutPanelMain.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 

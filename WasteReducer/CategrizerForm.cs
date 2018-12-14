@@ -22,7 +22,7 @@ namespace WasteReducer
         private DatabaseHandler db = null;
         private const string PATH = "res/img/";
         private Dictionary<PictureBox, Product> addedProducts;
-        private Dictionary<ProductBase, Bitmap> productIcons;
+        private Dictionary<Product, Bitmap> productIcons;
         private Font overlayFont;
 
         public CategrizerForm()
@@ -31,7 +31,7 @@ namespace WasteReducer
 
             pictureBoxes = this.flowLayoutPanelMain.Controls;
             addedProducts = new Dictionary<PictureBox, Product>();
-            productIcons = new Dictionary<ProductBase, Bitmap>();
+            productIcons = new Dictionary<Product, Bitmap>();
             labelHelp.Size = new Size(this.ClientSize.Width - 30, this.ClientSize.Height - this.menuStrip1.Height - 30);
 
             try
@@ -75,6 +75,11 @@ namespace WasteReducer
                 Image im = GetProductImage(prod);
                 string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n' + prod.Id;
                 im = ExtraGraphics.AddTextToPicture(new Bitmap(im), overlayText, overlayFont);
+                if (prod.Count > 1)
+                {
+                    overlayText = 'x' + prod.Count.ToString();
+                    im = ExtraGraphics.AddTextToPicture(new Bitmap(im), overlayText, overlayFont, StringAlignment.Far, StringAlignment.Far);
+                }
                 PictureBox pic = AddPictureBox(im);
                 addedProducts.Add(pic, prod);
             }
@@ -193,7 +198,7 @@ namespace WasteReducer
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        private Bitmap GetProductImage(ProductBase product)
+        private Bitmap GetProductImage(Product product)
         {
             if (!productIcons.ContainsKey(product))
                 productIcons.Add(product, ExtraGraphics.LoadImage(product.ImageName));

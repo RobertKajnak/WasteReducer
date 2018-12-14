@@ -27,7 +27,7 @@ namespace WasteReducer
             for (int i = image.Height / 4; i < image.Height * 3 / 4; i += 10)
                 for (int j = image.Width / 4; j < image.Width * 3 / 4; j += 10)
                 {
-                    Color c = image.GetPixel(i, j);
+                    Color c = image.GetPixel(j, i);
                     if (useDominant)
                     {
                         R += (c.R >= c.G && c.R >= c.B) ? 1 : 0;
@@ -60,40 +60,43 @@ namespace WasteReducer
         /// <summary>
         /// Overlays text onto the original. The original file is modified. The same is returned
         /// </summary>
-        /// <param name="original">the original image. WIll be modified</param>
+        /// <param name="original">the original image. Is not modified</param>
         /// <param name="text">The text ot be overlayed</param>
         /// <param name="font">the font familiy and sizeis the only relevant attribute</param>
         /// <returns> pointer to original</returns>
-        public static Bitmap AddTextToPicture(Bitmap original, string text, Font font)
+        public static Bitmap AddTextToPicture(Bitmap original, string text, Font font,
+                StringAlignment horizontal = StringAlignment.Center, StringAlignment vertical = StringAlignment.Center)
         {
-            float scalingFactor = (float)((float)original.Height / 100.0);
+            Bitmap newIm = (Bitmap)original.Clone();
+
+            float scalingFactor = (float)((float)newIm.Height / 100.0);
             Font resizedFont = new Font(font.FontFamily, font.Size * scalingFactor);
 
-            Color colShadow = GetDominantColor(original, true);
+            Color colShadow = GetDominantColor(newIm, true);
             Color col = Color.FromArgb(255 - colShadow.R, 255 - colShadow.G, 255 - colShadow.B);
 
             StringFormat format = new StringFormat();
-            format.Alignment = StringAlignment.Center;
-            format.LineAlignment = StringAlignment.Center;
-            format.Trimming = StringTrimming.EllipsisCharacter;
+            format.Alignment = horizontal;
+            format.LineAlignment = vertical;
+            //format.Trimming = StringTrimming.EllipsisCharacter;
             //Bitmap img = new Bitmap(width, height);
-            Graphics Graph = Graphics.FromImage(original);
+            Graphics Graph = Graphics.FromImage(newIm);
 
             //G.Clear(background);
             int offset = (int)Math.Ceiling(scalingFactor * 1.5);
-            var rect_shadow = new Rectangle(offset, offset, original.Width - offset, original.Height - offset);
+            var rect_shadow = new Rectangle(offset, offset, newIm.Width - offset, newIm.Height - offset);
 
             SolidBrush brush_shadow = new SolidBrush(colShadow);
             Graph.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
             Graph.DrawString(text, resizedFont, brush_shadow, rect_shadow, format);
             brush_shadow.Dispose();
 
-            var rect = new Rectangle(0, 0, original.Width, original.Height);
+            var rect = new Rectangle(0, 0, newIm.Width, newIm.Height);
             SolidBrush brush_text = new SolidBrush(col);
             Graph.DrawString(text, resizedFont, brush_text, rect, format);
             brush_text.Dispose();
 
-            return original;
+            return newIm;
         }
 
         /// <summary>
@@ -157,8 +160,7 @@ namespace WasteReducer
                 img = WasteReducer.Properties.Resources.placeholder;
             }
 
-            
-            return ResizeImage(img, BOXWIDTH, BOXHEIGHT);
+            return ResizeImage(img, img.Width* BOXHEIGHT / img.Height, BOXHEIGHT);
         }
 
         //TODO: Escape activates cancel
@@ -200,7 +202,7 @@ namespace WasteReducer
         {
             PictureBox pictureBox = new PictureBox();
             ///Eliminates the possibility of not having a selection zone around the image
-            if ((double)image.Size.Width / image.Size.Height == (double)BOXWIDTH / BOXHEIGHT)
+            if ((double)image.Size.Width / image.Size.Height != (double)BOXWIDTH / BOXHEIGHT)
                 pictureBox.Size = new System.Drawing.Size(BOXWIDTH, BOXHEIGHT);
             else
                 pictureBox.Size = new System.Drawing.Size(BOXWIDTH-15, BOXHEIGHT);
