@@ -12,8 +12,8 @@ namespace WasteReducer
     class DatabaseHandler
     {
         private const string database_name = @"res\products.db";
-        private List<Product> database;
-        public List<Product> Database { get => database; } 
+        private List<ProductBase> database;
+        public List<ProductBase> Database { get => database; } 
         public readonly string PATH = "";
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace WasteReducer
             {
                 throw new DatabaseException("Could not open File");
             }
-            database = new List<Product>();
+            database = new List<ProductBase>();
 
             try
             {
@@ -42,8 +42,8 @@ namespace WasteReducer
 
                     string[] attributes = line.Split(';');
                     this.database.Add(
-                        new Product(long.Parse(attributes[0]), PATH + attributes[0] + ".jpg", attributes[1],attributes[2],
-                        int.Parse(attributes[3])==1,int.Parse(attributes[4]), double.Parse(attributes[5]),int.Parse(attributes[6]), 0)
+                        new ProductBase(long.Parse(attributes[0]), PATH + attributes[0] + ".jpg", attributes[1],attributes[2],
+                        int.Parse(attributes[3])==1,int.Parse(attributes[4]), double.Parse(attributes[5]),int.Parse(attributes[6]))
                         );
                 }
             }
@@ -54,14 +54,14 @@ namespace WasteReducer
 
         }
 
-        public Product GetProduct(long id)
+        public ProductBase GetProduct(long id)
         {
             var target = database.Find(p => p.Id == id);
             if (target == null)
                 return null;
             else
             {
-                return new Product(target);
+                return new ProductBase(target);
             }
         }
 

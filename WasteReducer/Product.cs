@@ -6,46 +6,42 @@ using System.Threading.Tasks;
 
 namespace WasteReducer
 {
-    public class Product
+    public class Product : ProductBase
     {
-        public long Id { get; }
-        public string Label { get; }
-        public string Category { get; }
-        public bool IsDiary { get; }
-        public int Limit { get; }
-        public string ImageName { get; }
-        public double Price { get; }
-        public int Facing { get; }
-        private DateTime expiryDate;
-        public DateTime ExpiryDate { get => expiryDate; set => SetExpiry(value); }
+        public DateTime ExpiryDate { get; }
+        public int Count { get; set; } = 1;
 
-        public Product(long id, string imageName, string label, string category, bool isDiary, 
-                        int limit, double price,int facing, DateTime expiryDate)
+        public Product(long id, string imageName, string label, string category, bool isDiary,
+                int limit, double price, int facing, DateTime expiryDate) :
+            base(id, imageName, label, category, isDiary, limit, price, facing)
         {
-            this.Id = id;
-            this.Label = label;
-            this.Category = category;
-            this.ImageName = imageName;
-            this.IsDiary = isDiary;
-            this.Limit = limit;
-            this.Facing = facing;
-            this.Price = price;
-            this.expiryDate = expiryDate;
+            this.ExpiryDate = expiryDate;
         }
 
         public Product(long id, string imageName, string label, string category, bool isDiary,
                         int limit, double price, int facing, int daysUntilExpiry) :
-            this(id, imageName, label, category, isDiary, limit, price, facing, DateTime.Today.AddDays(daysUntilExpiry)){ }
+            this(id, imageName, label, category, isDiary, limit, price, facing, DateTime.Today.AddDays(daysUntilExpiry))
+        { }
 
         public Product(Product p) : this(p.Id, p.ImageName, p.Label, p.Category, p.IsDiary, p.Limit, p.Price, p.Facing, p.ExpiryDate) { }
 
-        public void SetExpiry(int daysUntilExpiry)
+        public Product(ProductBase p, DateTime expiryDate) : this(p.Id, p.ImageName, p.Label, p.Category, p.IsDiary, p.Limit, p.Price, p.Facing, expiryDate) { }
+
+        public Product(ProductBase p, int daysUntilExpiry) : this(p, DateTime.Today.AddDays(daysUntilExpiry)) { }
+
+        public override bool Equals(object obj)
         {
-            SetExpiry(DateTime.Today.AddDays(daysUntilExpiry));
+            Product other = (Product)obj;
+            return other.Id == this.Id && other.ExpiryDate == this.ExpiryDate;
         }
-        public void SetExpiry(DateTime expirydate)
+
+        public override int GetHashCode()
         {
-            this.expiryDate = expirydate;
+            var hashCode = 860764308;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + ExpiryDate.GetHashCode();
+            hashCode = hashCode * -1521134295 + Count.GetHashCode();
+            return hashCode;
         }
     }
 

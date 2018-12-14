@@ -90,14 +90,14 @@ namespace WasteReducer
         ///TODO(optional): analyse if handling only the ID instead of the Product object is better
         private void AddItem(long id, DateTime date)
         {
-            Product prod = db.GetProduct(id);
-            prod.SetExpiry(date);
-            if (prod == null)
+            ProductBase prodB = db.GetProduct(id);
+            if (prodB == null)
             {
                 MessageBox.Show("The specified product does not exist");
             }
             else
             {
+                Product prod = new Product(prodB,date);
                 string filename = prod.ImageName;
                 Image im = LoadImage(filename);
                 string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n'+prod.Id;
@@ -435,7 +435,7 @@ namespace WasteReducer
                 case (Keys.B):
                     ///deBug
                     Random rand = new Random();
-                    foreach (Product p in db.Database)
+                    foreach (ProductBase p in db.Database)
                     {
                         AddItem(p.Id,DateTime.Today.AddDays(rand.Next(0,5)));
                     }
