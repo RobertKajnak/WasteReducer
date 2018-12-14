@@ -345,7 +345,9 @@ namespace WasteReducer
                         "Delete or backspace removes the item\n" +
                         "\n\n" + 
                         "Press Enter or click on 'Generate' to get a suggestion on what should be discounted" +
-                        "and which items should go into a Zero Waste Bag";
+                        "and which items should go into a Zero Waste Bag\n"+
+                        "\n"+
+                        "Use +/ -to zoom in and out";
             String caption = "Help/About";
             MessageBox.Show(text, caption);
         }

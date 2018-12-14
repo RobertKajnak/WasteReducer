@@ -303,13 +303,11 @@ namespace WasteReducer
         #region Help
         private void HelpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            String text = "Scan an Item to add it to the selection.\n" +
-                        "It can also be added by double clicking in an empty region" +
-                        "\n\n" +
-                        "Delete or backspace removes the item\n" +
-                        "\n\n" +
-                        "Press Enter or click on 'Generate' to get a suggestion on what should be discounted" +
-                        "and which items should go into a Zero Waste Bag";
+            String text = "In this screen you can see all the suggested arrangement for the products\n"+
+                            "\n"+
+                            "To zoom in and out use +/-\n"+
+                            "\n"+
+                            "Press Escape to close the window";
             String caption = "Help/About";
             MessageBox.Show(text, caption);
         }
