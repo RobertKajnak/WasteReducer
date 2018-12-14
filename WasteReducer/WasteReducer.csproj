@@ -63,7 +63,7 @@
     <Compile Include="CategrizerForm.Designer.cs">
       <DependentUpon>CategrizerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GraphicTools.cs" />
+    <Compile Include="ExtraGraphics.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductBase.cs" />
     <Compile Include="Program.cs" />

@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace WasteReducer
 {
@@ -20,6 +22,7 @@ namespace WasteReducer
         private DatabaseHandler db = null;
         private const string PATH = "res/img/";
         private Dictionary<PictureBox, Product> addedProducts;
+        private Dictionary<ProductBase, Bitmap> productIcons;
         private Font overlayFont;
 
         public CategrizerForm()
@@ -28,6 +31,7 @@ namespace WasteReducer
 
             pictureBoxes = this.flowLayoutPanelMain.Controls;
             addedProducts = new Dictionary<PictureBox, Product>();
+            productIcons = new Dictionary<ProductBase, Bitmap>();
             labelHelp.Size = new Size(this.ClientSize.Width - 30, this.ClientSize.Height - this.menuStrip1.Height - 30);
 
             try
@@ -42,7 +46,7 @@ namespace WasteReducer
                 Application.Exit();
             }
 
-            overlayFont = new Font("calibri",12F);
+            overlayFont = new Font("calibri", 12F);
 
         }
 
@@ -53,39 +57,7 @@ namespace WasteReducer
 
         #region Utility Classes and functions
 
-        //TODO: Escape activates cancel
-        /// <summary>
-        /// Creates a window with a single input field that returns the value entered into that field
-        /// </summary>
-        public static class Prompt
-        {
-            public static string ShowDialog(string text, string caption)
-            {
-                Form prompt = new Form()
-                {
-                    Width = 210,
-                    Height = 150,
-                    FormBorderStyle = FormBorderStyle.FixedDialog,
-                    Text = caption,
-                    StartPosition = FormStartPosition.CenterScreen
-                };
-                Label textLabel = new Label() { Left = 5, Top = 15, Text = text, Width=190,TextAlign = System.Drawing.ContentAlignment.MiddleCenter };
-                TextBox textBox = new TextBox() { Left = 50, Top = 40, Width = 100 };
-                Button confirmation = new Button() { Text = "Ok", Left = 40, Width = 50, Top = 70, DialogResult = DialogResult.OK };
-                Button cancel = new Button() { Text = "Cancel", Left = 110, Width = 50, Top = 70, DialogResult = DialogResult.Cancel };
-
-                ///TODO(optional): Add a different icon for this
-                prompt.Icon = global::WasteReducer.Properties.Resources.icon;
-                confirmation.Click += (sender, e) => { prompt.Close(); };
-                prompt.Controls.Add(textBox);
-                prompt.Controls.Add(confirmation);
-                prompt.Controls.Add(cancel);
-                prompt.Controls.Add(textLabel);
-                prompt.AcceptButton = confirmation;
-
-                return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : null;
-            }
-        }
+        
 
         ///TODO(optional): analyse if handling only the ID instead of the Product object is better
         private void AddItem(long id, DateTime date)
@@ -97,11 +69,12 @@ namespace WasteReducer
             }
             else
             {
-                Product prod = new Product(prodB,date);
-                string filename = prod.ImageName;
-                Image im = LoadImage(filename);
-                string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n'+prod.Id;
-                im = AddTextToPicture(new Bitmap(im), overlayText, overlayFont);
+                Product prod = new Product(prodB, date);
+                //string filename = prod.ImageName;
+                //Image im = LoadImage(filename);
+                Image im = GetProductImage(prod);
+                string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n' + prod.Id;
+                im = ExtraGraphics.AddTextToPicture(new Bitmap(im), overlayText, overlayFont);
                 PictureBox pic = AddPictureBox(im);
                 addedProducts.Add(pic, prod);
             }
@@ -120,7 +93,7 @@ namespace WasteReducer
                 }
                 else
                 {
-                    AddItem(barcode,prompt.date);
+                    AddItem(barcode, prompt.date);
                 }
             }
 
@@ -146,22 +119,10 @@ namespace WasteReducer
                 labelHelp.Visible = false;
                 labelHelp.Enabled = false;
             }
-            PictureBox pictureBox = new PictureBox();
+
+            var pictureBox = ExtraGraphics.GeneratePictureBox(image);
             pictureBox.Name = "pictureBox" + pictureBoxes.Count;
-            ///Eliminates the possibility of not having a selection zone around the image
-            if (image.Size.Height / image.Size.Width == 5 / 4)
-                pictureBox.Size = new System.Drawing.Size(250, 200);
-            else
-                pictureBox.Size = new System.Drawing.Size(240, 200);
-
-            pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            pictureBox.TabIndex = 0;
-            pictureBox.TabStop = false;
-            pictureBox.Padding = new System.Windows.Forms.Padding(5);
             pictureBox.Click += new System.EventHandler(this.PictureBox_Click);
-
-            pictureBox.Image = image;
-
             pictureBoxes.Add(pictureBox);
 
             this.flowLayoutPanelMain.ResumeLayout(false);
@@ -169,86 +130,7 @@ namespace WasteReducer
             return pictureBox;
         }
 
-        /// <summary>
-        /// Calculate the dominant color of the image
-        /// </summary>
-        /// <param name="image">Image to parse</param>
-        /// <param name="useDominant">True: uses most dominant R/G/B; False: uses average</param>
-        /// <returns></returns>
-        private Color GetDominantColor(Bitmap image, bool useDominant=true)
-        {
-            int R = 0, G = 0, B = 0, S = 0;
-            for (int i = image.Height / 4; i < image.Height * 3 / 4; i += 10)
-                for (int j = image.Width / 4; j < image.Width * 3 / 4; j += 10)
-                {
-                    Color c = image.GetPixel(i, j);
-                    if (useDominant)
-                    {
-                        R += (c.R >= c.G && c.R >= c.B) ? 1 : 0;
-                        G += (c.G >= c.R && c.G >= c.B) ? 1 : 0;
-                        B += (c.B >= c.G && c.B >= c.R) ? 1 : 0;
-                    }
-                    else
-                    {
-                        R += c.R;
-                        G += c.G;
-                        B += c.B;
-                        S++;
-                    }
-                }
-            if (useDominant)
-            {
-                int Rn = (R >= G && R >= B) ? 255 : 0;
-                int Gn = (G >= R && R >= B) ? 255 : 0;
-                int Bn = (B >= G && B >= R) ? 255 : 0;
-                R = Rn; B = Bn; G = Gn;
-            }
-            else
-            {
-                R /= S; G /= S; B /= S;
-            }
-
-            return Color.FromArgb(R, G, B);
-        }
-
-        /// <summary>
-        /// Overlays text onto the original. The original file is modified. The same is returned
-        /// </summary>
-        /// <param name="original">the original image. WIll be modified</param>
-        /// <param name="text">The text ot be overlayed</param>
-        /// <param name="font">the font familiy and sizeis the only relevant attribute</param>
-        /// <returns> pointer to original</returns>
-        private Bitmap AddTextToPicture(Bitmap original,string text, Font font)
-        {
-            float scalingFactor = (float)((float)original.Height / 100.0);
-            Font resizedFont = new Font(overlayFont.FontFamily, overlayFont.Size * scalingFactor);
-
-            Color colShadow = GetDominantColor(original, true);
-            Color col = Color.FromArgb(255- colShadow.R, 255 - colShadow.G, 255 - colShadow.B);
-
-            StringFormat format = new StringFormat();
-            format.Alignment = StringAlignment.Center;
-            format.LineAlignment = StringAlignment.Center;
-            format.Trimming = StringTrimming.EllipsisCharacter;
-            //Bitmap img = new Bitmap(width, height);
-            Graphics Graph = Graphics.FromImage(original);
-
-            //G.Clear(background);
-            int offset = (int)Math.Ceiling(scalingFactor * 1.5);
-            var rect_shadow = new Rectangle(offset, offset, original.Width- offset, original.Height- offset);
-
-            SolidBrush brush_shadow = new SolidBrush(colShadow);
-            Graph.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
-            Graph.DrawString(text, resizedFont, brush_shadow, rect_shadow, format);
-            brush_shadow.Dispose();
-
-            var rect = new Rectangle(0, 0, original.Width, original.Height);
-            SolidBrush brush_text = new SolidBrush(col);
-            Graph.DrawString(text, resizedFont, brush_text, rect, format);
-            brush_text.Dispose();
-
-            return original;
-        }
+              
 
         private void SelectPictureBox(PictureBox pb)
         {
@@ -306,37 +188,18 @@ namespace WasteReducer
 
 
         /// <summary>
-        /// Loads the bitmap from file, copies it, than releases the file resource
+        /// Checks if a product has already been loaded and adds the necessary image.
+        /// If the product is loaded, it uses the existing image, otherwise it loads it from disk
         /// </summary>
-        /// <param name="path">Path to the image file</param>
+        /// <param name="product"></param>
         /// <returns></returns>
-        static Bitmap LoadImage(string path)
+        private Bitmap GetProductImage(ProductBase product)
         {
-            Bitmap img = null;
-            try
-            {
-                using (Bitmap b = new Bitmap(path))
-                {
-                    img = new Bitmap(b.Width, b.Height, b.PixelFormat);
-                    img.SetResolution(b.HorizontalResolution, b.VerticalResolution);
-                    //img.Palette = b.Palette; -- clears the image. Maybe not loaded properly? Oh, well
-                    img.Tag = b.Tag;
-
-                    using (Graphics g = Graphics.FromImage(img))
-                    {
-                        g.DrawImage(b, 0, 0);
-                        g.Flush();
-                    }
-                }
-            }
-            catch
-            {
-                img = WasteReducer.Properties.Resources.placeholder;
-            }
-            
-
-            return img;
+            if (!productIcons.ContainsKey(product))
+                productIcons.Add(product, ExtraGraphics.LoadImage(product.ImageName));
+            return productIcons[product];
         }
+
 
         private void AddDemoItems()
         {
