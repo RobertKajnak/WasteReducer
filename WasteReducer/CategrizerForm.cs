@@ -24,6 +24,7 @@ namespace WasteReducer
         private Dictionary<PictureBox, Product> addedProducts;
         private Dictionary<Product, Bitmap> productIcons;
         private Font overlayFont;
+        private bool isGroupingEnabled;
 
         public CategrizerForm()
         {
@@ -48,6 +49,7 @@ namespace WasteReducer
 
             overlayFont = new Font("calibri", 12F);
 
+            isGroupingEnabled = groupItemsToolStripMenuItem.Checked;
         }
 
         private void Categorizer_Load(object sender, EventArgs e)
@@ -70,10 +72,43 @@ namespace WasteReducer
             else
             {
                 Product prod = new Product(prodB, date);
-                //string filename = prod.ImageName;
-                //Image im = LoadImage(filename);
+                AddItem(prod);
+            }
+        }
+
+        private void AddItem(Product product)
+        {
+            List<Product> products = new List<Product>();
+            if (isGroupingEnabled)
+            {
+                var toRemove = new List<PictureBox>();
+                foreach (var pb in addedProducts.Keys)
+                {
+                    if (product.Equals(addedProducts[pb]))
+                    {
+                        toRemove.Add(pb);
+                    }
+                }
+                product.Count += toRemove.Sum(x => addedProducts[x].Count);
+
+                foreach (var pb in toRemove)
+                {
+                    SelectPictureBox(pb);
+                    RemovePictureBox();
+                }
+                products.Add(product);
+            }
+            else
+            {
+                for (int i = 0; i < product.Count; i++)
+                {
+                    products.Add(new Product(product));
+                }
+            }
+            foreach (var prod in products)
+            {
                 Image im = GetProductImage(prod);
-                string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n' + prod.Id;
+                string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n' + prod.Id + "\n To Exp: " + (prod.ExpiryDate - DateTime.Today).TotalDays;
                 im = ExtraGraphics.AddTextToPicture(new Bitmap(im), overlayText, overlayFont);
                 if (prod.Count > 1)
                 {
@@ -82,6 +117,17 @@ namespace WasteReducer
                 }
                 PictureBox pic = AddPictureBox(im);
                 addedProducts.Add(pic, prod);
+            }
+
+        }
+
+        private void OrganizeDuplicates()
+        {
+            var allProducts = addedProducts.Values;
+            ClearWorkspace();
+            foreach (Product p in allProducts)
+            {
+                AddItem(p);
             }
         }
 
@@ -253,6 +299,21 @@ namespace WasteReducer
 
         #endregion
 
+        #region Options
+        private void groupItemsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (groupItemsToolStripMenuItem.Checked)
+            {
+                isGroupingEnabled = true;
+            }
+            else
+            {
+                isGroupingEnabled = false;
+            }
+            OrganizeDuplicates();
+        }
+        #endregion
+
         #region Help
         private void HelpToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -315,6 +376,11 @@ namespace WasteReducer
                 case (Keys.D):
                     ClearWorkspace();
                     break;
+                case (Keys.G):
+                    groupItemsToolStripMenuItem.Checked = !groupItemsToolStripMenuItem.Checked;
+                    isGroupingEnabled = groupItemsToolStripMenuItem.Checked;
+                    OrganizeDuplicates();
+                    break;
                 case (Keys.ControlKey):
                     isControlPressed = true;
                     break;
@@ -355,5 +421,7 @@ namespace WasteReducer
             labelHelp.Size = new Size(this.ClientSize.Width-30, this.ClientSize.Height - this.menuStrip1.Height-30);
         }
         #endregion
+
+
     }
 }
