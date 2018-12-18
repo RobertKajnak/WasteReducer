@@ -390,7 +390,7 @@ namespace WasteReducer
                     Random rand = new Random();
                     foreach (ProductBase p in db.Database)
                     {
-                        AddItem(p.Id,DateTime.Today.AddDays(rand.Next(0,5)));
+                        AddItem(p.Id,DateTime.Today.AddDays(rand.Next(1,5)));
                     }
                     break;
                 case (Keys.Add):
