@@ -35,12 +35,13 @@ namespace WasteReducer
 
             ///Not only shorthand, but if the date changes during run, the results will be consistent
             DateTime today = DateTime.Today;
+            ///ON the INFERENCE model: obtain object
             foreach (Product product in products)
             {
                 /// In reality, this should not happen. Added for future-proofing
-                if (product.ExpiryDate <= today)
+                if (product.ExpiryDate <= today) ///INFERENCE: obtain all attributes -> obtain feature
                 {
-                    expired.Add(product);
+                    expired.Add(product);///INFERENCE:  match Truth value => true; if false move to next clause
                 }
                 ///DISCOUNT: Expires tomorrow
                 else if (product.ExpiryDate <= today.AddDays(1))
@@ -110,16 +111,18 @@ namespace WasteReducer
                     nothingAdded = true;
                     for (int i = 0; i < n && ip<prods.Count; i++)
                     {
+                        ///INFERENCE: propose extension
                         ///checks for items within the category of the to-be-added item and ensures it doesn't go over limit
                         if ((ZWB[i].FindAll(x=>x.Category.Equals(prods[ip].Category)).Count<prods[ip].Limit) &&
                             ///Checks to be within price, but try to be close to the lower price
                             (ZWB[i].Sum(x => x.Price)+prods[ip].Price<config.PriceLimitUpper) &&
                             (ZWB[i].Sum(x => x.Price) < config.PriceLimitLower))
                         {
+                            ///INFERENCE: verify: truth value
                             ZWB[i].Add(prods[ip]);
                             ZWB_passed.Remove(prods[ip++]);
                             nothingAdded = false;
-                        }
+                        }///INFERENCE: critique:=> take new product -> modify design by adding trying a new Product
                     }
                 }
             }
@@ -136,7 +139,7 @@ namespace WasteReducer
                 int n = this.config.NrOfBags;
                 var ZWB = new ZeroWasteBagsAll();
                 ///The preferences by which order the products will be added in order
-                ///This defines the skeletal design of the bags
+                ///INFERENCE: This defines the skeletal design of the bags
                 var pref = new List<Predicate<Product>>();
                 pref.Add(p => p.Category.Equals("salad"));
                 pref.Add(p => p.IsDiary == true);
