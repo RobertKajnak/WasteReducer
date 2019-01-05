@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WasteReducer.Entities;
 
 namespace WasteReducer
 {
@@ -10,11 +11,12 @@ namespace WasteReducer
     {
         private readonly List<Product> products; 
         private readonly WasteBagConfiguration config;
-        private readonly List<Product> shelf;
+        private readonly ShelfProducts shelf;
+        ///Backup variable, not expected to be used
         private readonly List<Product> expired;
-        private readonly List<Product> discounted;
-        private readonly List<Product> ZWB_candidates;
-        private readonly List<List<Product>> ZWB_final;
+        private readonly DiscountedProducts discounted;
+        private readonly ZeroWasteBag ZWB_candidates;
+        private readonly ZeroWasteBagsAll ZWB_final;
 
         /// <summary>
         /// Generates the items that should be discounted and those that should be left on
@@ -27,9 +29,9 @@ namespace WasteReducer
             this.products = products;
             this.config = config;
             expired = new List<Product>();
-            shelf = new List<Product>();
-            discounted = new List<Product>();
-            ZWB_candidates = new List<Product>();
+            shelf = new ShelfProducts();
+            discounted = new DiscountedProducts();
+            ZWB_candidates = new ZeroWasteBag();
 
             ///Not only shorthand, but if the date changes during run, the results will be consistent
             DateTime today = DateTime.Today;
@@ -44,8 +46,11 @@ namespace WasteReducer
                         discounted.Add(product);
                     
                     }
-                    else if (product.ExpiryDate <= today.AddDays(3))
+                    else if (product.ExpiryDate <= today.AddDays(2))
                     {
+                    if (product.Facing >= 4)
+                        shelf.Add(product);
+                    else
                         ZWB_candidates.Add(product);
                     }
                     else
@@ -65,13 +70,13 @@ namespace WasteReducer
         /// </summary>
         /// <param name="ZWB"></param>
         /// <param name="criteria"></param>
-        private void AddToBags(List<List<Product>> ZWB, List<Predicate<Product>> criteriaImportance, List<Predicate<Product>> criteriaFilter)
+        private void AddToBags(ZeroWasteBagsAll ZWB, List<Predicate<Product>> criteriaImportance, List<Predicate<Product>> criteriaFilter)
         {
             int n = this.config.NrOfBags;
             ///Initialized the empty bags, if they have not been yet
             if (ZWB.Count == 0)
             {
-                for (int i = 0; i < n; i++) ZWB.Add(new List<Product>());
+                for (int i = 0; i < n; i++) ZWB.Add(new ZeroWasteBag());
             }
 
             var ZWB_passed = new List<Product>();
@@ -117,14 +122,14 @@ namespace WasteReducer
             ZWB_passed.ForEach(x=>ZWB_candidates.Add(x));
         }
 
-        private List<List<Product>> generateWasteBags()
+        private ZeroWasteBagsAll generateWasteBags()
         {
             if (ZWB_candidates == null)
                 return null;
             else
             {
                 int n = this.config.NrOfBags;
-                var ZWB = new List<List<Product>>();
+                var ZWB = new ZeroWasteBagsAll();
                 ///The preferences by which order the products will be added in order
                 var pref = new List<Predicate<Product>>();
                 pref.Add(p => p.Category.Equals("salad"));
@@ -140,10 +145,11 @@ namespace WasteReducer
             }
             
         }
-        public List<Product> GetShelfItems() => shelf;
+        public ShelfProducts GetShelfItems() => shelf;
+        ///Backup variable, not expected to be used
         public List<Product> GetExpiredItems() => expired;
-        public List<Product> GetDiscountedProducts() => discounted;
-        public List<List<Product>> GetWasteBags() => ZWB_final ;
+        public DiscountedProducts GetDiscountedProducts() => discounted;
+        public ZeroWasteBagsAll GetWasteBags() => ZWB_final ;
 
     }
 }

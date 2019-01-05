@@ -1,4 +1,4 @@
-#img_id;product_name;category;is_diary;limit;price;facing;expiration
+#img_id;product_name;category;is_diary;limit;price;facing
 
 6395;Melkan Griekse Yoghurt Naturel 10%;yoghurt;1;2;1.03;0
 7614;Almhof Hoekje aardbei;yoghurt;1;2;1;3
@@ -12,9 +12,9 @@
 3520;Spar Wraps Flour Tortilla;small meal;0;2;1.85;1
 13508;Knorr Wereldgerechten Lasagne Bolognese;big meal;0;1;3.12;3
 1040;Conimex Noodles Hot&Spicy;small meal;0;2;0.95;2
-21582;Spar lunchsalade caesar kip;salad;0;1;3;5
+21582;Spar lunchsalade caesar kip;salad;0;1;3;3
 21586;Spar maaltijdsalade couscous falafel;salad;0;1;4.5;2;
-21585;Spar maaltijdsalade caesar;salad;0;1;4;4
+21585;Spar maaltijdsalade caesar;salad;0;1;4;3
 21578;Spar rauwkostsalade couscous rucola;salad;0;1;2.6;4
 21583;Spar lunchsalade Italiaans;salad;0;1;3;4
 12756;Doritos Chips Nacho Cheese;snack;0;3;1.54;3

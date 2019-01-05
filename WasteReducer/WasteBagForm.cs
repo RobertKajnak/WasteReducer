@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WasteReducer.Entities;
 
 namespace WasteReducer
 {
@@ -16,7 +17,7 @@ namespace WasteReducer
         List<List<Product>> productLanes;
         FlowLayoutPanel shelfLane;
         FlowLayoutPanel discountedLane;
-        List<List<Product>> wasteBags;
+        ZeroWasteBagsAll wasteBags;
         List<FlowLayoutPanel> wasteBageLanes;
         FlowLayoutPanel wasteBagLanePanel = null;
         FlowLayoutPanel trashLane;
@@ -80,7 +81,7 @@ namespace WasteReducer
             wasteBags = logic.GetWasteBags();
             if (wasteBags.Count > 0)
             {
-                foreach (List<Product> bag in wasteBags)
+                foreach (ZeroWasteBag bag in wasteBags)
                 {
                     if (bag.Count == 0)
                         continue;

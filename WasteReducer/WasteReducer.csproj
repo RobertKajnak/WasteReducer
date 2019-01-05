@@ -63,6 +63,9 @@
     <Compile Include="CategrizerForm.Designer.cs">
       <DependentUpon>CategrizerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Entities\DiscountedProducts.cs" />
+    <Compile Include="Entities\ShelfProducts.cs" />
+    <Compile Include="Entities\ZeroWasteBagsAll.cs" />
     <Compile Include="ExtraGraphics.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductBase.cs" />
@@ -71,6 +74,7 @@
     <Compile Include="RotatedLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Entities\ZeroWasteBag.cs" />
     <Compile Include="WasteBagConfiguration.cs" />
     <Compile Include="WasteBagForm.cs">
       <SubType>Form</SubType>
