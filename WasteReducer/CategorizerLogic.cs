@@ -35,30 +35,32 @@ namespace WasteReducer
 
             ///Not only shorthand, but if the date changes during run, the results will be consistent
             DateTime today = DateTime.Today;
-                foreach (Product product in products)
+            foreach (Product product in products)
+            {
+                /// In reality, this should not happen. Added for future-proofing
+                if (product.ExpiryDate <= today)
                 {
-                    if (product.ExpiryDate <= today)
-                    {
-                        expired.Add(product);
-                    }
-                    else if (product.ExpiryDate <= today.AddDays(1))
-                    {
-                        discounted.Add(product);
-                    
-                    }
-                    else if (product.ExpiryDate <= today.AddDays(2))
-                    {
-                    if (product.Facing >= 4)
-                        shelf.Add(product);
-                    else
-                        ZWB_candidates.Add(product);
-                    }
-                    else
-                    {
-                        shelf.Add(product);
-                    }
-
+                    expired.Add(product);
                 }
+                ///DISCOUNT: Expires tomorrow
+                else if (product.ExpiryDate <= today.AddDays(1))
+                {
+                    discounted.Add(product);
+                }
+                ///SHELF: expires in 2 days, but has high facing or expires in more than 2 days
+                else if (((product.ExpiryDate <= today.AddDays(2)) && (product.Facing >= 4))
+                            || (product.ExpiryDate > today.AddDays(2)))
+                {
+                    shelf.Add(product);
+                }
+                ///ZWB: Expires in 2 days but has low facing
+                else if ((product.ExpiryDate <= today.AddDays(2)) && (product.Facing <= 4))
+                {
+                    ZWB_candidates.Add(product);
+                }
+
+            }
+            ///Sorts the ZWB products into the 5(or otherwise set by parameter) bags
             ZWB_final = generateWasteBags();
             foreach (var p in ZWB_candidates)
                 discounted.Add(p);
@@ -68,8 +70,9 @@ namespace WasteReducer
         /// <summary>
         /// Apppends the products from <see cref="ZWB_candidates"/> based on criteria to ZWB.
         /// </summary>
-        /// <param name="ZWB"></param>
-        /// <param name="criteria"></param>
+        /// <param name="ZWB">The batch of waste bags. Can be empty or already have items in it</param>
+        /// <param name="criteriaImportance">Predicates that define the preference order</param>
+        /// <param name="criteriaFilter">Predicates that define the filtering criteria </param>
         private void AddToBags(ZeroWasteBagsAll ZWB, List<Predicate<Product>> criteriaImportance, List<Predicate<Product>> criteriaFilter)
         {
             int n = this.config.NrOfBags;
@@ -79,6 +82,7 @@ namespace WasteReducer
                 for (int i = 0; i < n; i++) ZWB.Add(new ZeroWasteBag());
             }
 
+            ///Restricts the items to only those that pass the criteria
             var ZWB_passed = new List<Product>();
             foreach (var crit in criteriaFilter)
             {
@@ -87,6 +91,7 @@ namespace WasteReducer
                 tempBag.ForEach(x=>ZWB_candidates.Remove(x));
             }
 
+            ///This adds the reamining items, that have not been added as a preference
             criteriaImportance.Add(x=>true);
             foreach (var p in criteriaImportance)
             {
@@ -131,6 +136,7 @@ namespace WasteReducer
                 int n = this.config.NrOfBags;
                 var ZWB = new ZeroWasteBagsAll();
                 ///The preferences by which order the products will be added in order
+                ///This defines the skeletal design of the bags
                 var pref = new List<Predicate<Product>>();
                 pref.Add(p => p.Category.Equals("salad"));
                 pref.Add(p => p.IsDiary == true);

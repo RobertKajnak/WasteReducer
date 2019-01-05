@@ -9,6 +9,14 @@ using System.IO;
 namespace WasteReducer
 {
 
+    /// <summary>
+    /// This represents a placeholder for the real database.
+    /// The text file should be under res\products.db by default.
+    /// Each line should be of the following format:
+    /// img_id;product_name;category;is_diary;limit;price;facing
+    /// Empty lines and lines starting with # are ignored
+    /// If an invalid format is found, a Database Exception is thrown
+    /// </summary>
     class DatabaseHandler
     {
         private const string database_name = @"res\products.db";
@@ -37,6 +45,7 @@ namespace WasteReducer
             {
                 foreach (string line in lines)
                 {
+                    ///# is considered a comment.
                     if (line.Length<4 || line[0].Equals('#'))
                         continue;
 
@@ -54,6 +63,11 @@ namespace WasteReducer
 
         }
 
+        /// <summary>
+        /// Returns the first product with the specified ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public ProductBase GetProduct(long id)
         {
             var target = database.Find(p => p.Id == id);

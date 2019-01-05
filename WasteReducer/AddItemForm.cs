@@ -15,6 +15,9 @@ namespace WasteReducer
         public long barcode = -1;
         public DateTime date;
 
+        /// <summary>
+        /// Handles adding a new item to the list of items.
+        /// </summary>
         public AddItemForm()
         {
             InitializeComponent();
@@ -23,7 +26,9 @@ namespace WasteReducer
             this.date = DateTime.Today.AddDays(2);
         }
 
-        
+       /// <summary>
+       /// ON successs returns the barcode entered
+       /// </summary>
         private void ReturnSuccess()
         {
             long.TryParse(this.textBox1.Text, out barcode);
@@ -60,6 +65,8 @@ namespace WasteReducer
             AddItemForm_KeyPress(sender, e);
         }
 
+
+        ///Allows only digits to be entered
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
@@ -83,9 +90,11 @@ namespace WasteReducer
         {
             switch (e.KeyChar)
             {
+                ///esc
                 case ((char)27):
                     ReturnFail();
                     break;
+                ///enter
                 case ((char)13):
                     ReturnSuccess();
                     break;

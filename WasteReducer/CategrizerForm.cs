@@ -25,6 +25,9 @@ namespace WasteReducer
         private Dictionary<Product, Bitmap> productIcons;
         private bool isGroupingEnabled;
 
+        /// <summary>
+        /// Handles interaction during the item list creation
+        /// </summary>
         public CategrizerForm()
         {
             InitializeComponent();
@@ -65,7 +68,11 @@ namespace WasteReducer
 
         
 
-        ///TODO(optional): analyse if handling only the ID instead of the Product object is better
+        /// <summary>
+        /// Attempts to add the item based on id and date. In case of an invalid item a prompt is displayed
+        /// </summary>
+        /// <param name="id">Id of the item</param>
+        /// <param name="date">Expiry date</param>
         private void AddItem(long id, DateTime date)
         {
             ProductBase prodB = db.GetProduct(id);
@@ -80,9 +87,14 @@ namespace WasteReducer
             }
         }
 
+        /// <summary>
+        /// Adds a product to both the graphical and logical product list.
+        /// </summary>
+        /// <param name="product"></param>
         private void AddItem(Product product)
         {
             List<Product> products = new List<Product>();
+            //if identical items are grouped, the item has to be found, removed and readded with a higher counter
             if (isGroupingEnabled)
             {
                 var toRemove = new List<PictureBox>();
@@ -104,11 +116,13 @@ namespace WasteReducer
             }
             else
             {
+                ///Adds the number of items in the product object to the logical list
                 for (int i = 0; i < product.Count; i++)
                 {
                     products.Add(new Product(product));
                 }
             }
+            /// Handles text overlay on image
             foreach (var prod in products)
             {
                 Image im = GetProductImage(prod);
@@ -118,7 +132,9 @@ namespace WasteReducer
             }
 
         }
-
+        /// <summary>
+        ///  To be called when duplicate display is toggled on or off. Works by resetting the graphical workspace and repopulating it
+        /// </summary>
         private void OrganizeDuplicates()
         {
             var allProducts = addedProducts.Values;
@@ -129,6 +145,9 @@ namespace WasteReducer
             }
         }
 
+        /// <summary>
+        /// Displays a prompt to add a new item.
+        /// </summary>
         private void PromptAddItem()
         {
             var prompt = new AddItemForm();
@@ -148,6 +167,7 @@ namespace WasteReducer
 
         }
 
+        ///Pasting barcode deemed not useful in current version
         /*private void PasteItem()
         {
             long barcode=-1;
@@ -159,7 +179,9 @@ namespace WasteReducer
         }*/
 
 
-        ///TODO(optional): Reduce picture size after loading to reduce memory usage. Also: don't load the same image twice
+        /// <summary>
+        /// Adds the image to the visual list
+        /// </summary>
         private PictureBox AddPictureBox(Image image)
         {
 
@@ -180,7 +202,10 @@ namespace WasteReducer
         }
 
               
-
+        /// <summary>
+        /// Highlights the clicked PictureBox and stores it
+        /// </summary>
+        /// <param name="pb"></param>
         private void SelectPictureBox(PictureBox pb)
         {
             if (selectedPictureBox != null)
@@ -191,6 +216,9 @@ namespace WasteReducer
             selectedPictureBox.BackColor = Color.CadetBlue;
         }
 
+        /// <summary>
+        /// Removes the currently selected picturebox. For selection see <see cref="SelectPictureBox(PictureBox)"/>
+        /// </summary>
         private void RemovePictureBox()
         {
             if (selectedPictureBox != null)
@@ -214,6 +242,9 @@ namespace WasteReducer
             }
         }
 
+        /// <summary>
+        /// Removes all items from both visual and graphical lists. Calls the GC
+        /// </summary>
         private void ClearWorkspace()
         {
             selectedPictureBox = null;
@@ -223,6 +254,10 @@ namespace WasteReducer
             labelHelp.Visible = true;
         }
 
+        /// <summary>
+        /// Calls the <see cref="WasteBagForm"/> to generate the product categories based on currently added products.
+        /// Does not hang the main window
+        /// </summary>
         private void CalcuateWasteBags()
         {
             if (pictureBoxes.Count < 1)
@@ -249,7 +284,9 @@ namespace WasteReducer
             return productIcons[product];
         }
 
-
+        /// <summary>
+        /// A list of items, all having 2 days to expiry
+        /// </summary>
         private void AddDemoItems()
         {
             foreach (int i in new[]{6395,6395,6395,7614,7614,14757,24436,

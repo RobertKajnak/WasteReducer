@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace WasteReducer
 {
+    /// <summary>
+    /// Represents the global configuration values of the wastebags. These include parameters such as the number of waste bags and price limits.
+    /// </summary>
     class WasteBagConfiguration
     {
         private int nrOfBags;

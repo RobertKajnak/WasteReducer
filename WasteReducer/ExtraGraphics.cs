@@ -215,6 +215,12 @@ namespace WasteReducer
             }
         }
 
+        /// <summary>
+        /// Adds the text ovelay to the Image. Does not modify the original image
+        /// </summary>
+        /// <param name="im">The original image</param>
+        /// <param name="prod">The product details to be overlayn</param>
+        /// <returns>The image with the overlayed text</returns>
         public static Image AddTextOverlay(Image im, Product prod)
         {
             string overlayText = prod.Category + '\n' + prod.Price + '€' + '\n' + prod.Id + "\n To Exp: " + (prod.ExpiryDate - DateTime.Today).TotalDays;

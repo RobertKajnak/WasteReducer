@@ -27,11 +27,11 @@ namespace WasteReducer
         bool isGroupingEnabled;
 
         /// <summary>
-        /// 
+        /// Calculates and displays which items should go into discount, kept on shelf and ZWB based on the provided list
         /// </summary>
-        /// <param name="productList"></param>
-        /// <param name="productIcons"></param>
-        /// <param name="isGroupingEnabled">If the list is grouped this CAN still be set to either</param>
+        /// <param name="productList">The list of the items to be categorized</param>
+        /// <param name="productIcons">A dictionary contining the unlabeled icons of the items</param>
+        /// <param name="isGroupingEnabled">If the list is grouped on creation. This CAN still be changed at runtime.
         public WasteBagForm(List<Product> productList, Dictionary<Product,Bitmap> productIcons,bool isGroupingEnabled)
         {
             InitializeComponent();
@@ -58,12 +58,19 @@ namespace WasteReducer
             InitializeLanes();
         }
 
+        /// <summary>
+        /// Initializes each of the graphical and logical containers for ZWB, Discount etc.
+        /// </summary>
         private void InitializeLanes()
         {
+            ///set lanesize and reset controls
             laneTitleSize = ExtraGraphics.BOXHEIGHT / 7;
             wasteBagLanePanel = null;
             flowLayoutPanelMain.Controls.Clear();
 
+            ///init logic. For each: load items from the logic controller and add the to the logical lane
+            ///Set appropriate lanetype
+            ///Add it to graphiccs controller 
             productLanes = new List<List<Product>>();
 
             productLanes.Add(logic.GetShelfItems());
@@ -79,6 +86,7 @@ namespace WasteReducer
             AddProductsToLane("Trash", trashLane, logic.GetExpiredItems());
 
             wasteBags = logic.GetWasteBags();
+            ///Add waste bag lane
             if (wasteBags.Count > 0)
             {
                 foreach (ZeroWasteBag bag in wasteBags)
@@ -86,10 +94,12 @@ namespace WasteReducer
                     if (bag.Count == 0)
                         continue;
                     FlowLayoutPanel wasteBagLane = AddLane(Lanetype.ZWB);
+                    ///Set title of lane
                     Label zwblabel = new Label();
                     zwblabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
                     zwblabel.Font = new Font("Calibri", laneTitleSize);
                     zwblabel.Size = new Size(ExtraGraphics.BOXWIDTH + 10, laneTitleSize * 4);
+                    ///Calculate and add total price of the items in he lane
                     zwblabel.Text = "ZWB " + (wasteBags.IndexOf(bag) + 1) + '\n' + bag.Sum(p => p.Price) + '€';
                     wasteBagLane.Controls.Add(zwblabel);
                     //wasteBagLane.Size = new Size(wasteBagLane.Size.Width, wasteBagLane.Height + zwblabel.Height);
@@ -107,6 +117,11 @@ namespace WasteReducer
 
         enum Lanetype { SHELF, DISCOUNT, ZWB, TRASH}
 
+        /// <summary>
+        /// Adds a new lane to the graphical controller.
+        /// </summary>
+        /// <param name="type">One of <see cref="Lanetype"/></param>
+        /// <returns></returns>
         private FlowLayoutPanel AddLane(Lanetype type)
         {
             FlowLayoutPanel flowLayoutPanel = new FlowLayoutPanel();
@@ -147,7 +162,12 @@ namespace WasteReducer
         }
 
         
-
+        /// <summary>
+        /// Adds each of the products to a cerain lane
+        /// </summary>
+        /// <param name="label">The label to use</param>
+        /// <param name="lane">The name of the lane</param>
+        /// <param name="products">The products in the lane</param>
         private void AddProductsToLane(string label, FlowLayoutPanel lane, List<Product> products)
         {
             if (products.Count > 0)
@@ -158,6 +178,10 @@ namespace WasteReducer
             }
         }
 
+        /// <summary>
+        /// Adds the main lane and the 5 sublanes 
+        /// </summary>
+        /// <returns></returns>
         private FlowLayoutPanel addWasteBagLane()
         {
             if (wasteBagLanePanel == null)
@@ -210,16 +234,24 @@ namespace WasteReducer
             return pb;
         }
 
+        /// <summary>
+        /// Should be called when changing the grouping option. Resets the graphical lane and re-adds the products with the correct counts
+        /// </summary>
+        /// <param name="lane"></param>
+        /// <param name="products"></param>
         private void OrganizeLane(FlowLayoutPanel lane, List<Product> products)
         {
             Control l = lane.Controls[0];
             lane.Controls.Clear();
 
+            ///create the new list
             var organizedList = new List<Product>();
             if (isGroupingEnabled)
             {
+                ///Counts each of the items with identical ID and exp date. Adds the new item with the new, grouped count
                 foreach (Product p in products)
                 {
+                    ///If the item has already been added, increases the count variable in the item. Otherwise adds it as a new instance
                     if (organizedList.Contains(p))
                     {
                         var foundP = organizedList.Find(x => p.Equals(x));
@@ -233,6 +265,7 @@ namespace WasteReducer
             }
             else
             {
+                ///Adds the number of instances to the products as they were when the items were grouped
                 foreach (Product p in products)
                 {
                     for (int i = 0; i < p.Count; i++)
@@ -241,6 +274,7 @@ namespace WasteReducer
                     }
                 }
             }
+            ///Updates the graphical interface to match the logical one
             lane.Controls.Add(l);
             foreach (var p in organizedList)
             {
@@ -248,6 +282,9 @@ namespace WasteReducer
             }
         }
 
+        /// <summary>
+        /// Calls <see cref="OrganizeLane"/> for each lane
+        /// </summary>
         private void OrganizeLanes()
         {
             var lanes = new[] { shelfLane, discountedLane, trashLane };
